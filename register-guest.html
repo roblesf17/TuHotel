@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Huésped</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .invite-card {
+            background: linear-gradient(135deg, #f0f9ff, #ede9fe);
+            border: 1px solid #c4b5fd;
+            border-radius: 14px;
+            padding: 1.25rem;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+        .invite-card .invite-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-size: 1.5rem; color: white;
+        }
+        .invite-card h3 { margin: 0 0 0.25rem; color: #1e293b; font-size: 1rem; }
+        .invite-card .invite-hotel {
+            display: inline-block;
+            background: white; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 0.3rem 0.85rem; font-weight: 700; font-size: 0.9rem;
+            margin-top: 0.35rem;
+        }
+        .invite-card p { margin: 0.4rem 0 0; color: #64748b; font-size: 0.8rem; }
+
+        .email-display {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 0.6rem 1rem; margin-bottom: 1rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .email-display span { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+        .email-display button {
+            background: none; border: none; color: var(--primary); cursor: pointer;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .email-display button:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-container glass-panel" style="max-width:420px; padding:2.5rem 2.25rem;">
+            <!-- Brand -->
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <div id="register-logo-box" style="width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg, var(--primary), #6366f1); display:inline-flex; align-items:center; justify-content:center; color:white; font-size:1.6rem; margin-bottom:1rem; box-shadow:0 8px 24px rgba(99,102,241,0.25); position:relative;">
+                    <i id="register-hotel-icon" class="fa-solid fa-hotel"></i>
+                    <img id="register-hotel-logo" src="" alt="Logo" style="display:none; width:100%; height:100%; object-fit:contain; border-radius:18px; padding:6px; position:absolute; inset:0; background:white;">
+                </div>
+                <h1 style="color:#1e293b; font-size:1.5rem; margin:0;" id="hotel-title">Cargando...</h1>
+                <p id="form-subtitle" style="color:#94a3b8; font-size:0.85rem; margin:0.35rem 0 0;">Ingresa tu correo para comenzar</p>
+            </div>
+
+            <!-- ====== PASO 1: SOLO EMAIL ====== -->
+            <div id="step-email" class="step active">
+                <form onsubmit="checkEmail(event)">
+                    <div class="input-group" style="margin-bottom:1.25rem;">
+                        <label for="email" style="font-size:0.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Correo Electrónico</label>
+                        <div style="position:relative;">
+                            <i class="fa-regular fa-envelope" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.9rem;"></i>
+                            <input type="email" id="email" placeholder="tu@email.com" required autofocus style="padding-left:40px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="btn-check-email" style="width:100%; padding:0.85rem; font-size:0.95rem; font-weight:600; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fa-solid fa-arrow-right"></i> Continuar
+                    </button>
+                </form>
+            </div>
+
+            <!-- ====== PASO 2A: USUARIO EXISTENTE (afiliación) ====== -->
+            <div id="step-affiliate" class="step">
+                <div class="invite-card">
+                    <div class="invite-icon" id="invite-icon-bg" style="background:linear-gradient(135deg, var(--primary), #6366f1);">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <h3>¡Bienvenido de vuelta, <span id="affiliate-name"></span>!</h3>
+                    <p id="affiliate-text">Ingresa tu contraseña para unirte a:</p>
+                    <span class="invite-hotel" id="affiliate-hotel" style="color:var(--primary);"></span>
+                </div>
+                <div class="email-display">
+                    <span id="display-email-aff"></span>
+                    <button type="button" onclick="goBackToEmail()"><i class="fa-solid fa-pen"></i> Cambiar</button>
+                </div>
+                <form onsubmit="submitAffiliate(event)">
+                    <div class="input-group" style="margin-bottom:1.25rem;">
+                        <label for="aff-password" style="font-size:0.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Contraseña</label>
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <i class="fa-solid fa-lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.85rem;"></i>
+                            <input type="password" id="aff-password" placeholder="Tu contraseña" required style="width:100%; padding-left:40px; padding-right:40px;" minlength="6">
+                            <button type="button" onclick="togglePasswordVisibility('aff-password', this)" style="position:absolute; right:10px; background:none; border:none; cursor:pointer; color:#94a3b8; display:flex; align-items:center; justify-content:center; height:100%; width:30px;">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="btn-affiliate" style="width:100%; padding:0.85rem; font-size:0.95rem; font-weight:600; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fa-solid fa-link"></i> Afiliarme e Ingresar
+                    </button>
+                </form>
+            </div>
+
+            <!-- ====== PASO 2B: USUARIO NUEVO (registro completo) ====== -->
+            <div id="step-register" class="step">
+                <div class="email-display">
+                    <span id="display-email-reg"></span>
+                    <button type="button" onclick="goBackToEmail()"><i class="fa-solid fa-pen"></i> Cambiar</button>
+                </div>
+                <form onsubmit="submitRegister(event)">
+                    <div class="input-group" style="margin-bottom:1rem;">
+                        <label for="fullName" style="font-size:0.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Nombre Completo</label>
+                        <div style="position:relative;">
+                            <i class="fa-solid fa-user" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.85rem;"></i>
+                            <input type="text" id="fullName" placeholder="Ej. Ana García" required style="padding-left:40px;">
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-bottom:1.5rem;">
+                        <label for="reg-password" style="font-size:0.8rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Contraseña (Mín. 6 caracteres)</label>
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <i class="fa-solid fa-lock" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:0.85rem;"></i>
+                            <input type="password" id="reg-password" placeholder="••••••••" required style="width:100%; padding-left:40px; padding-right:40px;" minlength="6">
+                            <button type="button" onclick="togglePasswordVisibility('reg-password', this)" style="position:absolute; right:10px; background:none; border:none; cursor:pointer; color:#94a3b8; display:flex; align-items:center; justify-content:center; height:100%; width:30px;">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="btn-register" style="width:100%; padding:0.85rem; font-size:0.95rem; font-weight:600; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fa-solid fa-user-plus"></i> Crear mi cuenta
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Footer links -->
+            <div style="margin-top:1.5rem; text-align:center;">
+                <a href="login.html" style="display:inline-flex; align-items:center; gap:5px; color:var(--primary); font-weight:600; font-size:0.85rem; text-decoration:none;">
+                    <i class="fa-solid fa-arrow-left"></i> Ya tengo cuenta, iniciar sesión
+                </a>
+            </div>
+            <div style="text-align:center; margin-top:0.75rem; font-size:0.75rem; color:#cbd5e1;">
+                Al registrarte, aceptas los
+                <a href="terminos.html" style="color:var(--primary); text-decoration:none; font-weight:500;">Términos</a> y
+                <a href="privacidad.html" style="color:var(--primary); text-decoration:none; font-weight:500;">Privacidad</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const hotelId = urlParams.get('hotel_id');
+        let hotelName = 'OmniHotel';
+        let hotelColor = 'var(--primary)';
+        let currentEmail = '';
+
+        function driveToThumb(url, size) {
+            let fileId = null;
+            const m1 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (m1) fileId = m1[1];
+            if (!fileId) {
+                const m2 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (m2) fileId = m2[1];
+            }
+            if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size || 200}`;
+            return url;
+        }
+        
+        if (hotelId) {
+            supabaseClient.from('hotels').select('name, settings').eq('id', hotelId).single()
+                .then(({ data: hotel }) => {
+                    if (hotel) {
+                        hotelName = hotel.name;
+                        document.getElementById('hotel-title').textContent = hotel.name;
+                        document.title = `${hotel.name} - Registro de Huésped`;
+                        const settings = hotel.settings || {};
+                        if (settings.logo) {
+                            const logoImg = document.getElementById('register-hotel-logo');
+                            const iconEl = document.getElementById('register-hotel-icon');
+                            if (logoImg) {
+                                logoImg.src = settings.logo.includes('drive.google.com') ? driveToThumb(settings.logo, 200) : settings.logo;
+                                logoImg.style.display = 'inline-block';
+                            }
+                            if (iconEl) iconEl.style.display = 'none';
+                        }
+                        if (settings.primary_color) {
+                            hotelColor = settings.primary_color;
+                            document.documentElement.style.setProperty('--primary', settings.primary_color);
+                            const logoBox = document.getElementById('register-logo-box');
+                            if (logoBox) logoBox.style.background = `linear-gradient(135deg, ${settings.primary_color}, #6366f1)`;
+                        }
+                    }
+                });
+        } else {
+            // Sin hotel_id → aplicar branding del SaaS (Tuhotel.pe)
+            const saasName = getSaaSName();
+            document.getElementById('hotel-title').textContent = saasName;
+            document.title = `${saasName} - Registro de Huésped`;
+            
+            const saasColor = getSaaSPrimaryColor();
+            document.documentElement.style.setProperty('--primary', saasColor);
+            hotelColor = saasColor;
+
+            const darken = (hex, amt) => {
+                let r = Math.max(0, parseInt(hex.slice(1,3),16) + amt);
+                let g = Math.max(0, parseInt(hex.slice(3,5),16) + amt);
+                let b = Math.max(0, parseInt(hex.slice(5,7),16) + amt);
+                return '#' + [r,g,b].map(x => Math.min(255, Math.round(x)).toString(16).padStart(2,'0')).join('');
+            };
+
+            const logoBox = document.getElementById('register-logo-box');
+            if (logoBox) logoBox.style.background = `linear-gradient(135deg, ${saasColor}, ${darken(saasColor, -30)})`;
+
+            // Fondo del login
+            const saasBg = getSaaSLoginBg();
+            const wrapper = document.querySelector('.login-wrapper');
+            if (wrapper) wrapper.style.background = saasBg;
+
+            // Tipografía
+            const saasFont = getSaaSFont();
+            if (saasFont && saasFont !== 'Inter') {
+                const fontLink = document.createElement('link');
+                fontLink.rel = 'stylesheet';
+                fontLink.href = `https://fonts.googleapis.com/css2?family=${saasFont.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
+                document.head.appendChild(fontLink);
+            }
+            document.body.style.fontFamily = `'${saasFont}', sans-serif`;
+        }
+
+        // Si ya hay sesión activa de guest con hotel_id en URL → invitación directa
+        const existingSession = getSession();
+        if (existingSession && existingSession.role === 'guest') {
+            if (hotelId) {
+                // Mostrar pantalla de invitación directa (ya logeado)
+                document.getElementById('step-email').classList.remove('active');
+                document.getElementById('form-subtitle').textContent = '';
+
+                supabaseClient.from('hotels').select('name, settings').eq('id', hotelId).single()
+                    .then(({ data: hotel }) => {
+                        const name = hotel ? hotel.name : 'este hotel';
+                        const color = hotel?.settings?.primary_color || 'var(--primary)';
+
+                        const inviteHtml = `
+                            <div style="text-align:center; padding:1rem 0; animation: fadeIn 0.3s ease;">
+                                <div style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg, ${color}, #6366f1); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+                                    <i class="fa-solid fa-envelope-open-text" style="font-size:1.8rem; color:white;"></i>
+                                </div>
+                                <h2 style="color:#1e293b; margin:0 0 0.35rem; font-size:1.2rem;">¡Tienes una invitación!</h2>
+                                <p style="color:#64748b; margin:0 0 1.25rem; font-size:0.9rem;">
+                                    <strong style="color:${color};">${name}</strong> te invita a unirte como huésped.
+                                </p>
+                                <p style="color:#94a3b8; font-size:0.8rem; margin:0 0 1.5rem;">
+                                    Podrás hacer reservas, ver tu historial y acceder a los servicios de este hotel desde tu portal.
+                                </p>
+                                <div style="display:flex; gap:0.75rem; flex-direction:column;">
+                                    <button class="btn" onclick="acceptInviteLoggedIn()" style="background:${color}; padding:0.75rem; font-size:0.95rem;">
+                                        <i class="fa-solid fa-check"></i> Sí, unirme a ${name}
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="window.location.href='guest.html'" style="padding:0.65rem; font-size:0.85rem;">
+                                        No, ir a mi portal
+                                    </button>
+                                </div>
+                                <p style="color:#cbd5e1; font-size:0.72rem; margin-top:1rem;">
+                                    Sesión activa como <strong>${existingSession.full_name}</strong>
+                                </p>
+                            </div>
+                        `;
+                        document.getElementById('form-subtitle').insertAdjacentHTML('afterend', inviteHtml);
+                    });
+            } else {
+                window.location.href = 'guest.html';
+            }
+        }
+
+        // ==========================================
+        // PASO 1: Verificar email
+        // ==========================================
+        async function checkEmail(e) {
+            e.preventDefault();
+            currentEmail = document.getElementById('email').value.toLowerCase().trim();
+            
+            const btn = document.getElementById('btn-check-email');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+            btn.disabled = true;
+
+            const { data: checkResult } = await supabaseClient
+                .rpc('app_check_email', { p_email: currentEmail });
+
+            const existing = (checkResult && checkResult.exists) ? checkResult.user : null;
+
+            if (existing && existing.role === 'guest') {
+                // Ya existe → paso 2A: afiliación
+                showStep('step-affiliate');
+                document.getElementById('form-subtitle').textContent = '';
+                document.getElementById('display-email-aff').textContent = currentEmail;
+                document.getElementById('affiliate-name').textContent = existing.full_name.split(' ')[0];
+                
+                if (hotelId) {
+                    document.getElementById('affiliate-hotel').textContent = hotelName;
+                    document.getElementById('affiliate-hotel').style.color = hotelColor;
+                    document.getElementById('affiliate-text').textContent = 'Ingresa tu contraseña para unirte a:';
+                    document.getElementById('invite-icon-bg').style.background = `linear-gradient(135deg, ${hotelColor}, #6366f1)`;
+                    document.getElementById('btn-affiliate').innerHTML = '<i class="fa-solid fa-link"></i> Afiliarme e Ingresar';
+                } else {
+                    document.getElementById('affiliate-hotel').style.display = 'none';
+                    document.getElementById('affiliate-text').textContent = 'Ingresa tu contraseña para acceder.';
+                    document.getElementById('btn-affiliate').innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión';
+                }
+
+                document.getElementById('aff-password').focus();
+            } else if (existing) {
+                // Existe pero no es guest (admin, recep, etc.)
+                showToast('Este correo pertenece a una cuenta del personal. Usa otro email.', 'warning');
+                btn.innerHTML = 'Continuar';
+                btn.disabled = false;
+            } else {
+                // No existe → paso 2B: registro nuevo
+                showStep('step-register');
+                document.getElementById('form-subtitle').textContent = hotelId ? `Crear cuenta en ${hotelName}` : 'Crear tu cuenta';
+                document.getElementById('display-email-reg').textContent = currentEmail;
+                document.getElementById('fullName').focus();
+            }
+        }
+
+        // ==========================================
+        // PASO 2A: Submit afiliación (login)
+        // ==========================================
+        async function submitAffiliate(e) {
+            e.preventDefault();
+            const password = document.getElementById('aff-password').value;
+            
+            const btn = document.getElementById('btn-affiliate');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+            btn.disabled = true;
+
+            const { user: loggedIn } = await appLogin(currentEmail, password);
+            if (loggedIn) {
+                if (hotelId) await saveAffiliation(currentEmail, loggedIn.full_name, hotelId);
+                showToast(hotelId ? `¡Afiliado a ${hotelName}!` : '¡Sesión iniciada!', 'success');
+                setTimeout(() => {
+                    redirectByRole('guest', hotelId || null);
+                }, 800);
+            } else {
+                showToast('Contraseña incorrecta. Intenta de nuevo.', 'error');
+                btn.innerHTML = hotelId
+                    ? '<i class="fa-solid fa-link"></i> Afiliarme e Ingresar'
+                    : '<i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión';
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // PASO 2B: Submit registro nuevo
+        // ==========================================
+        async function submitRegister(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const password = document.getElementById('reg-password').value;
+
+            const btn = document.getElementById('btn-register');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando cuenta...';
+            btn.disabled = true;
+
+            const result = await appRegister(currentEmail, password, fullName, hotelId, 'guest');
+            if (result.error) {
+                showToast(result.error, 'error');
+                btn.innerHTML = 'Registrarme Ahora';
+                btn.disabled = false;
+                return;
+            }
+
+            showToast('¡Cuenta creada! Iniciando sesión...', 'success');
+            const { user: loggedIn } = await appLogin(currentEmail, password);
+            if (loggedIn) {
+                if (hotelId) await saveAffiliation(currentEmail, fullName, hotelId);
+                setTimeout(() => {
+                    redirectByRole('guest', hotelId || null);
+                }, 1000);
+            } else {
+                showToast('Error al iniciar sesión. Intenta manualmente.', 'error');
+                btn.innerHTML = 'Registrarme Ahora';
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // UTILIDADES
+        // ==========================================
+
+        // Guardar afiliación en la BD (o reactivar si estaba inactiva)
+        async function saveAffiliation(email, name, hId) {
+            if (!hId) return;
+            await supabaseClient
+                .from('guest_hotel_affiliations')
+                .upsert([{
+                    guest_email: email.toLowerCase().trim(),
+                    guest_name: name,
+                    hotel_id: hId,
+                    status: 'active'
+                }], { onConflict: 'guest_email,hotel_id' });
+        }
+
+        // Aceptar invitación estando ya logeado
+        async function acceptInviteLoggedIn() {
+            await saveAffiliation(existingSession.email, existingSession.full_name, hotelId);
+            showToast(`¡Te uniste a ${hotelName}!`, 'success');
+            setTimeout(() => {
+                window.location.href = 'guest.html?hotel_id=' + hotelId;
+            }, 600);
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function goBackToEmail() {
+            showStep('step-email');
+            document.getElementById('form-subtitle').textContent = 'Ingresa tu correo para comenzar';
+            document.getElementById('btn-check-email').innerHTML = 'Continuar';
+            document.getElementById('btn-check-email').disabled = false;
+            document.getElementById('email').focus();
+        }
+    </script>
+</body>
+</html>

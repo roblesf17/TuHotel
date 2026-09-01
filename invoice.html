@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Pago</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 3rem;
+            border: 1px solid #e2e8f0;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border-radius: 8px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .hotel-info h1 {
+            margin: 0;
+            color: #1e40af;
+            font-size: 2rem;
+        }
+        .hotel-info p {
+            margin: 0.25rem 0;
+            color: #64748b;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .info-block h3 {
+            font-size: 0.875rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        .info-block p {
+            margin: 0.25rem 0;
+            font-weight: 500;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        .text-right { text-align: right; }
+        .total-row td {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #0f172a;
+            border-top: 2px solid #1e40af;
+        }
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 3rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        .action-buttons {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .invoice-box { box-shadow: none; border: none; padding: 0; }
+            .action-buttons { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="action-buttons">
+        <button class="btn" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+    </div>
+
+    <div class="invoice-box">
+        <div class="header">
+            <div class="hotel-info">
+                <h1 id="inv-hotel-name">Cargando Hotel...</h1>
+                <p id="inv-hotel-ruc">RUC: -</p>
+                <p id="inv-hotel-address">Dirección: -</p>
+            </div>
+            <div class="invoice-title">
+                <h2>Comprobante</h2>
+                <p style="font-weight:600; margin-top:0.5rem"># <span id="inv-id">---</span></p>
+                <p style="color:#64748b">Fecha: <span id="inv-date">---</span></p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="info-block">
+                <h3>Facturar A:</h3>
+                <p id="inv-guest-name">---</p>
+                <p style="color:#64748b">Doc: <span id="inv-guest-doc">---</span></p>
+            </div>
+            <div class="info-block text-right">
+                <h3>Detalles de Estadía:</h3>
+                <p>Check-in: <span id="inv-checkin" style="font-weight:400">---</span></p>
+                <p>Check-out: <span id="inv-checkout" style="font-weight:400">---</span></p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th style="text-align:center">Cant.</th>
+                    <th class="text-right">P. Unit.</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="inv-items">
+                <!-- JS injects -->
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="3" class="text-right">Total a Pagar</td>
+                    <td class="text-right">S/ <span id="inv-total">0.00</span></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer">
+            <p>¡Gracias por su preferencia! Esperamos verlo pronto.</p>
+            <p>Este documento es un comprobante de consumo generado por el sistema.</p>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        async function loadInvoice() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('id');
+
+            if (!bookingId) {
+                alert('No se especificó la reserva.');
+                return;
+            }
+
+            const { data: booking, error } = await supabaseClient
+                .from('bookings')
+                .select('*, hotels(name, ruc, address), rooms(room_number)')
+                .eq('id', bookingId)
+                .single();
+
+            if (error || !booking) {
+                alert('Error al cargar comprobante.');
+                return;
+            }
+
+            // Llenar datos
+            document.getElementById('inv-hotel-name').textContent = booking.hotels.name;
+            document.getElementById('inv-hotel-ruc').textContent = 'RUC: ' + booking.hotels.ruc;
+            document.getElementById('inv-hotel-address').textContent = booking.hotels.address || '';
+            
+            document.getElementById('inv-id').textContent = booking.id.split('-')[0].toUpperCase();
+            document.getElementById('inv-date').textContent = new Date().toLocaleDateString('es-ES');
+            
+            document.getElementById('inv-guest-name').textContent = booking.guest_name;
+            document.getElementById('inv-guest-doc').textContent = booking.guest_document;
+            
+            document.getElementById('inv-checkin').textContent = booking.check_in_date;
+            document.getElementById('inv-checkout').textContent = booking.check_out_date;
+            
+            const roomNumber = booking.rooms ? booking.rooms.room_number : 'N/A';
+            const alojamiento = parseFloat(booking.total_amount);
+            
+            // Renderizar items de la boleta
+            const tbody = document.getElementById('inv-items');
+            let grandTotal = 0;
+            
+            // 1. Alojamiento
+            tbody.innerHTML = `
+                <tr>
+                    <td>Alojamiento en Habitación <strong>${roomNumber}</strong></td>
+                    <td style="text-align:center">1</td>
+                    <td class="text-right">S/ ${alojamiento.toFixed(2)}</td>
+                    <td class="text-right">S/ ${alojamiento.toFixed(2)}</td>
+                </tr>
+            `;
+            grandTotal += alojamiento;
+
+            // 2. Consumos (orders + order_items)
+            const { data: orders } = await supabaseClient
+                .from('orders')
+                .select('*, order_items(*, products(name))')
+                .eq('booking_id', bookingId);
+
+            if (orders && orders.length > 0) {
+                orders.forEach(order => {
+                    if (order.order_items) {
+                        order.order_items.forEach(item => {
+                            const productName = item.products?.name || 'Producto';
+                            const unitPrice = parseFloat(item.unit_price);
+                            const subtotal = parseFloat(item.subtotal);
+                            grandTotal += subtotal;
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${productName}</td>
+                                    <td style="text-align:center">${item.quantity}</td>
+                                    <td class="text-right">S/ ${unitPrice.toFixed(2)}</td>
+                                    <td class="text-right">S/ ${subtotal.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                });
+            }
+
+            document.getElementById('inv-total').textContent = grandTotal.toFixed(2);
+        }
+
+        loadInvoice();
+    </script>
+</body>
+</html>

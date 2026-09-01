@@ -1,0 +1,3540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TuHotel.pe - Encuentra tu Hotel Ideal y Reserva Directo sin Intermediarios</title>
+    <meta name="description" content="Directorio hotelero oficial del Perú. Consulta tarifas en tiempo real de recepción, contacta directo por WhatsApp y ubica tu hotel en mapa GPS con 0% comisiones.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Shared App Core -->
+    <script src="js/app.js"></script>
+
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #f0f9ff;
+            --primary-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            --accent-blue: #38bdf8;
+            --accent-green: #10b981;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --radius-pill: 9999px;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a, button, select, [onclick], .btn, .btn-primary-pill, .btn-guest-pill, .feature-box-minimal, 
+        .stat-item-unit, .hotel-clean-card, .quick-city-chip, .faq-accordion-item, .autocomplete-item {
+            cursor: pointer !important;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--slate-800);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 1. NAVBAR FLOTANTE */
+        .site-nav-container {
+            position: fixed;
+            top: 1.25rem;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            max-width: 1400px;
+            width: calc(100% - 2.5rem);
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .site-nav-glass {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: var(--radius-pill);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand-logo-unit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--slate-900);
+            transition: var(--transition);
+        }
+
+        .brand-logo-unit:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-icon-sq {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+        }
+
+        .brand-name-h3 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-name-h3 span {
+            color: var(--primary);
+        }
+
+        .nav-links-menu {
+            display: flex;
+            align-items: center;
+            gap: 2.25rem;
+        }
+
+        .nav-item-link {
+            text-decoration: none;
+            color: var(--slate-600);
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.2rem 0;
+        }
+
+        .nav-item-link:hover {
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-guest-pill {
+            background: var(--slate-50);
+            color: var(--slate-700);
+            padding: 0.65rem 1.35rem;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: var(--transition);
+            border: 1px solid var(--slate-200);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-guest-pill:hover {
+            background: #ffffff;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary-pill {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            padding: 0.65rem 1.4rem;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 800;
+            transition: var(--transition);
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(79, 70, 229, 0.4);
+        }
+
+        /* 2. HERO TRIP.COM STYLE WITH PANORAMIC BACKGROUND */
+        .hero-trip-section {
+            position: relative;
+            background: linear-gradient(180deg, rgba(14, 40, 80, 0.42) 0%, rgba(10, 30, 65, 0.68) 100%),
+                        url('https://pages.trip.com/Hotels/images/V8HomePageBackGround.webp') no-repeat center 28% / cover;
+            min-height: 520px;
+            padding: 9.5rem 1.5rem 5.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .hero-trip-inner {
+            max-width: 1160px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-trip-title {
+            font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .section-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f9ff;
+            color: #0284c7;
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            margin-bottom: 1.25rem;
+            border: 1.5px solid #bae6fd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+            transition: var(--transition);
+        }
+
+        .section-pill-tag:hover {
+            transform: translateY(-1px);
+        }
+
+        .hero-trip-title .trip-dot {
+            color: #38bdf8;
+        }
+
+        .hero-trip-sub {
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 500;
+            max-width: 650px;
+            margin: 0 auto 2.25rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* HORIZONTAL SEARCH BAR PILL (CON BOTONES BUSCAR + MAPA GPS EN LA MISMA FILA) */
+        .trip-search-card {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 0.65rem 0.85rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            display: grid;
+            grid-template-columns: 1.8fr auto 1.2fr auto;
+            align-items: center;
+            gap: 0.65rem;
+            max-width: 1080px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .trip-search-col {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            transition: var(--transition);
+            position: relative;
+            text-align: left;
+        }
+
+        .trip-search-col:hover {
+            background: #f8fafc;
+        }
+
+        .trip-search-col i.trip-icon {
+            font-size: 1.15rem;
+            color: #0284c7;
+            flex-shrink: 0;
+        }
+
+        .trip-col-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .trip-col-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .trip-col-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--slate-900);
+            font-family: inherit;
+            padding: 0;
+        }
+
+        .trip-col-input::placeholder {
+            color: var(--slate-400);
+            font-weight: 500;
+        }
+
+        .trip-divider-v {
+            width: 1px;
+            height: 36px;
+            background: #e2e8f0;
+        }
+
+        .trip-search-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 100%;
+        }
+
+        .btn-trip-search {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 0.85rem 1.6rem;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: var(--transition);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+            white-space: nowrap;
+            height: 100%;
+            min-height: 48px;
+        }
+
+        .btn-trip-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(2, 132, 199, 0.45);
+            background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+        }
+
+        .btn-trip-gps {
+            background: #eff6ff;
+            color: #0284c7;
+            border: 1.5px solid #bfdbfe;
+            border-radius: 14px;
+            padding: 0.85rem 1.3rem;
+            font-size: 0.92rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: var(--transition);
+            white-space: nowrap;
+            height: 100%;
+            min-height: 48px;
+        }
+
+        .btn-trip-gps:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.15);
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid var(--slate-200);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
+            z-index: 500;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            text-align: left;
+            padding: 6px;
+        }
+
+        .autocomplete-dropdown.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .autocomplete-item:hover {
+            background: #f8fafc;
+        }
+
+        .autocomplete-item-title {
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: var(--slate-900);
+        }
+
+        .autocomplete-item-sub {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+        }
+
+        .trip-quick-chips-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
+        }
+
+        .trip-chip-btn {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ffffff;
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .trip-chip-btn:hover {
+            background: #ffffff;
+            color: var(--slate-900);
+            transform: translateY(-1px);
+        }
+
+        /* 4. DIRECTORIO PRO CON SIDEBAR FILTROS */
+        .directory-section-pro {
+            background: #f8fafc;
+            border-top: 1px solid var(--slate-200);
+            border-bottom: 1px solid var(--slate-200);
+            padding: 4.5rem 1.5rem 4.5rem;
+        }
+
+        .directory-container-pro {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .directory-header-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .section-h2-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--slate-900);
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+        }
+
+        .directory-split-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2.25rem;
+            align-items: start;
+        }
+
+        /* SIDEBAR FILTROS */
+        .directory-sidebar-filters {
+            position: sticky;
+            top: 85px;
+        }
+
+        .filter-card-box {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .filter-header-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--slate-200);
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-clear-filter {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .btn-clear-filter:hover {
+            background: #f0f9ff;
+        }
+
+        .filter-group-block {
+            margin-bottom: 1.4rem;
+        }
+
+        .filter-group-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--slate-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.65rem;
+            display: block;
+        }
+
+        .filter-city-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-city-pill {
+            text-align: left;
+            background: #f8fafc;
+            border: 1.5px solid var(--slate-200);
+            color: var(--slate-700);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-city-pill:hover {
+            background: #f0f9ff;
+            border-color: #bae6fd;
+            color: var(--primary);
+        }
+
+        .filter-city-pill.active {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            border-color: #0284c7;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+
+        .filter-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--slate-700);
+            padding: 6px 0;
+            cursor: pointer;
+        }
+
+        .filter-checkbox-item input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .filter-select-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            background: #ffffff;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .sidebar-gps-card {
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+            border-radius: 14px;
+            padding: 1.15rem;
+            color: #ffffff;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-gps-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.25);
+        }
+
+        /* MAIN HOTEL CARDS */
+        .directory-results-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding: 0.5rem 0;
+        }
+
+        .hotels-pro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .hotel-clean-card {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .hotel-clean-card:hover {
+            transform: translateY(-5px);
+            border-color: #93c5fd;
+            box-shadow: 0 18px 40px rgba(2, 132, 199, 0.12);
+        }
+
+        .hotel-img-frame {
+            height: 190px;
+            border-radius: 18px 18px 0 0;
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .hotel-img-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.35);
+            opacity: 0;
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hotel-clean-card:hover .hotel-img-frame::after {
+            opacity: 1;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .badge-verified-pill {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(236, 253, 245, 0.95);
+            backdrop-filter: blur(8px);
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            z-index: 2;
+        }
+
+        .badge-camera-photos {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .hotel-clean-card:hover .badge-camera-photos {
+            background: #0284c7;
+            transform: scale(1.05);
+        }
+
+        .badge-gps-distance {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .hotel-body-box {
+            padding: 1.35rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+        }
+
+        .hotel-name-h4 {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--slate-900);
+            margin-bottom: 0.35rem;
+        }
+
+        .hotel-address-p {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            margin-bottom: 0.85rem;
+        }
+
+        .hotel-amenities-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 1.15rem;
+        }
+
+        .amenity-chip {
+            background: #f8fafc;
+            border: 1px solid var(--slate-200);
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--slate-600);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .hotel-price-and-cta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--slate-100);
+            gap: 0.75rem;
+        }
+
+        .price-label-lead {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--slate-500);
+            text-transform: uppercase;
+        }
+
+        .price-amount-bold {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        /* ACTIONS MENU WRAPPER & DROPDOWN */
+        .hotel-actions-menu-wrapper {
+            position: relative;
+        }
+
+        .btn-hotel-options-trigger {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.65rem 1.1rem;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+            white-space: nowrap;
+        }
+
+        .btn-hotel-options-trigger:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.38);
+        }
+
+        .hotel-options-dropdown {
+            position: absolute;
+            bottom: calc(100% + 4px);
+            right: 0;
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+            padding: 8px;
+            min-width: 220px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(6px) scale(0.96);
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        /* Puente invisible para que al mover el mouse no se cierre el menú */
+        .hotel-options-dropdown::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            height: 18px;
+            background: transparent;
+        }
+
+        .hotel-actions-menu-wrapper:hover .hotel-options-dropdown,
+        .hotel-actions-menu-wrapper.active .hotel-options-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .hotel-option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            transition: var(--transition);
+        }
+
+        .hotel-option-item:hover {
+            background: #f1f5f9;
+            transform: translateX(3px);
+        }
+
+        .hotel-option-item i {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+
+        .hotel-option-item.opt-register {
+            color: #4f46e5;
+        }
+        .hotel-option-item.opt-register:hover {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+
+        .hotel-option-item.opt-gallery {
+            color: #0284c7;
+        }
+        .hotel-option-item.opt-gallery:hover {
+            background: #eff6ff;
+            color: #0369a1;
+        }
+
+        .hotel-option-item.opt-portal {
+            color: #7c3aed;
+        }
+        .hotel-option-item.opt-portal:hover {
+            background: #f5f3ff;
+            color: #6d28d9;
+        }
+
+        .hotel-option-item.opt-wa {
+            color: #16a34a;
+        }
+        .hotel-option-item.opt-wa:hover {
+            background: #f0fdf4;
+            color: #15803d;
+        }
+
+        .hotel-option-item.opt-maps {
+            color: #0284c7;
+        }
+        .hotel-option-item.opt-maps:hover {
+            background: #eff6ff;
+            color: #0369a1;
+        }
+
+        /* 4. BENEFICIOS PARA EL HUÉSPED (4 COLUMNAS - FULL WIDTH DARK CARD / PORTADA) */
+        .features-section-minimal {
+            width: 100%;
+            background: linear-gradient(180deg, #091124 0%, #0c1836 100%);
+            padding: 5rem 1.5rem;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .features-minimal-inner {
+            max-width: 1380px;
+            margin: 0 auto;
+        }
+
+        .features-section-minimal .section-pill-tag {
+            background: rgba(255, 255, 255, 0.1);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .features-section-minimal .section-h2-title {
+            color: #ffffff;
+            margin-top: 0.5rem;
+        }
+
+        .features-section-minimal .section-desc-sub {
+            color: #94a3b8;
+        }
+
+        .features-4col-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            .features-4col-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .features-4col-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        .feature-card-pillar {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .feature-card-pillar:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-pillar-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .feature-pillar-content h4 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 0.5rem;
+        }
+
+        .feature-pillar-content p {
+            font-size: 0.84rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* 5. TESTIMONIOS (OPINIONES REALES) */
+        .testimonials-section-compact {
+            width: 100%;
+            background: #f8fafc;
+            padding: 4.5rem 1.5rem;
+            border-top: 1px solid var(--slate-200);
+            border-bottom: 1px solid var(--slate-200);
+        }
+
+        .testimonials-auto-grid {
+            max-width: 1380px;
+            margin: 2.5rem auto 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .testimonials-auto-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .testimonial-card-clean {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.25rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+            transition: var(--transition);
+        }
+
+        .testimonial-card-clean:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .test-author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.85rem;
+        }
+
+        .test-avatar-emblem {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .test-author-name {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--slate-900);
+        }
+
+        .test-author-role {
+            font-size: 0.76rem;
+            color: var(--slate-500);
+            font-weight: 600;
+        }
+
+        .test-quote-text {
+            font-size: 0.85rem;
+            color: var(--slate-600);
+            line-height: 1.6;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .test-stars-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--slate-100);
+            color: #f59e0b;
+            font-size: 0.8rem;
+        }
+
+        /* 6. SOPORTE & PREGUNTAS FRECUENTES (ANCHO COMPLETO & ESTILO LIMPIO) */
+        .support-hub-section {
+            width: 100%;
+            background: #ffffff;
+            padding: 3.5rem 1.5rem 4.5rem;
+            position: relative;
+            border-top: 1px solid var(--slate-100);
+        }
+
+        .support-section-header {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 2rem;
+        }
+
+        .support-unified-box {
+            max-width: 1380px;
+            width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            align-items: stretch;
+        }
+
+        @media (max-width: 968px) {
+            .support-unified-box {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* LEFT PANEL: CANALES DE CONTACTO */
+        .support-channels-panel {
+            background: #ffffff;
+            border-right: 1px solid var(--slate-200);
+            padding: 2rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 968px) {
+            .support-channels-panel {
+                border-right: none;
+                border-bottom: 1px solid var(--slate-200);
+                padding: 1.5rem;
+            }
+        }
+
+        .panel-heading-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin: 0 0 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-heading-sub {
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            margin: 0 0 1.25rem;
+            line-height: 1.5;
+        }
+
+        .support-channel-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .support-channel-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1.1rem;
+            background: #f8fafc;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .support-channel-card:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .support-ch-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .support-ch-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin-bottom: 1px;
+        }
+
+        .support-ch-sub {
+            font-size: 0.73rem;
+            color: var(--slate-500);
+            font-weight: 500;
+        }
+
+        .support-ch-arrow {
+            margin-left: auto;
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .support-channel-card:hover .support-ch-arrow {
+            color: var(--slate-700);
+            transform: translateX(2px);
+        }
+
+        /* RIGHT PANEL: ACORDEÓN DE PREGUNTAS */
+        .support-faqs-panel {
+            padding: 2rem 2.25rem;
+            background: #ffffff;
+        }
+
+        @media (max-width: 968px) {
+            .support-faqs-panel {
+                padding: 1.5rem;
+            }
+        }
+
+        #faq-accordion-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .faq-accordion-item {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            transition: var(--transition);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .faq-accordion-item:hover {
+            border-color: #cbd5e1;
+        }
+
+        .faq-accordion-item.active {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+        .faq-q-title {
+            padding: 0.95rem 1.15rem;
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--slate-800);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            user-select: none;
+        }
+
+        .faq-accordion-item.active .faq-q-title {
+            color: var(--primary);
+        }
+
+        .faq-q-title i {
+            font-size: 0.75rem;
+            color: var(--slate-400);
+            transition: transform 0.25s ease, color 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-accordion-item.active .faq-q-title i {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .faq-a-desc {
+            display: none;
+            padding: 0 1.15rem 1rem;
+            font-size: 0.83rem;
+            color: var(--slate-600);
+            line-height: 1.6;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .faq-accordion-item.active .faq-a-desc {
+            display: block;
+        }
+
+        /* MODALES FULLSCREEN: MAPA GPS & GALERÍA DE FOTOS */
+        .omni-fullscreen-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .omni-fullscreen-modal-overlay.active {
+            display: flex;
+        }
+
+        .omni-modal-box {
+            background: #ffffff;
+            border-radius: 24px;
+            max-width: 940px;
+            width: 100%;
+            max-height: 92vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+            position: relative;
+            animation: modalScaleUp 0.25s ease;
+        }
+
+        @keyframes modalScaleUp {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .omni-modal-header {
+            padding: 1.15rem 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--slate-200);
+            background: #ffffff;
+            z-index: 10;
+        }
+
+        .omni-modal-close-btn {
+            background: #f1f5f9;
+            border: none;
+            color: var(--slate-600);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .omni-modal-close-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            transform: scale(1.08);
+        }
+
+        /* GALLERY LIGHTBOX VIEWER */
+        .gallery-main-viewer {
+            position: relative;
+            background: #091322;
+            min-height: 360px;
+            max-height: 460px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .gallery-main-img {
+            max-width: 100%;
+            max-height: 460px;
+            width: 100%;
+            object-fit: cover;
+            transition: opacity 0.2s ease, transform 0.3s ease;
+        }
+
+        .gallery-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.75);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: var(--transition);
+            z-index: 5;
+        }
+
+        .gallery-nav-btn:hover {
+            background: #0284c7;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav-btn.prev { left: 1rem; }
+        .gallery-nav-btn.next { right: 1rem; }
+
+        .gallery-counter-pill {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(15, 23, 42, 0.82);
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+            backdrop-filter: blur(8px);
+            z-index: 5;
+        }
+
+        .gallery-caption-pill {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.82);
+            color: #ffffff;
+            padding: 4px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+            backdrop-filter: blur(8px);
+            z-index: 5;
+            max-width: 60%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gallery-thumbnails-strip {
+            display: flex;
+            gap: 10px;
+            padding: 0.85rem 1.5rem;
+            background: #f8fafc;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--slate-200);
+        }
+
+        .gallery-thumb-item {
+            width: 72px;
+            height: 52px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2.5px solid transparent;
+            opacity: 0.6;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .gallery-thumb-item.active, .gallery-thumb-item:hover {
+            opacity: 1;
+            border-color: #0284c7;
+            transform: translateY(-2px);
+        }
+
+        .gallery-footer-actions {
+            padding: 1.15rem 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            background: #ffffff;
+        }
+
+        /* MAP MODAL STYLES */
+        #hotel-leaflet-map {
+            width: 100%;
+            height: 500px;
+            background: #f1f5f9;
+        }
+
+        .gps-radar-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.8);
+            animation: pulseRadar 1.8s infinite;
+        }
+
+        /* 5. BENEFICIOS PARA EL HUÉSPED (FULL WIDTH OSCURO PORTADA) */
+        .features-section-minimal {
+            width: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(2, 132, 199, 0.22), transparent 70%),
+                        linear-gradient(180deg, #081120 0%, #0d1b38 50%, #081120 100%);
+            position: relative;
+            color: #ffffff;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3.25rem 1.5rem 3.75rem;
+            text-align: center;
+        }
+
+        .features-minimal-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .features-section-minimal .section-pill-tag {
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+            margin-bottom: 0.85rem;
+        }
+
+        .features-section-minimal .section-h2-title {
+            color: #ffffff;
+        }
+
+        .features-section-minimal .section-desc-sub {
+            color: #94a3b8;
+        }
+
+        .features-4col-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .feature-card-pillar {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 2.25rem 1.6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .feature-card-pillar:hover {
+            transform: translateY(-6px);
+            border-color: #38bdf8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 45px rgba(2, 132, 199, 0.25);
+        }
+
+        .feature-pillar-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.35rem;
+            transition: var(--transition);
+        }
+
+        .feature-card-pillar:hover .feature-pillar-icon {
+            transform: scale(1.08);
+        }
+
+        .feature-pillar-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .feature-pillar-content h4 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .feature-pillar-content p {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        /* 6. TESTIMONIOS (COMPACTO, ELEGANTE Y PROPORCIONADO) */
+        .testimonials-section-compact {
+            width: 100%;
+            padding: 3.75rem 1.5rem;
+            background: #f8fafc;
+            border-top: 1px solid var(--slate-200);
+            border-bottom: 1px solid var(--slate-200);
+            text-align: center;
+        }
+
+        .testimonials-auto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            max-width: 860px;
+            margin: 0 auto;
+            gap: 1.25rem;
+            align-items: stretch;
+        }
+
+        .testimonial-card-clean {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .testimonial-card-clean:hover {
+            transform: translateY(-3px);
+            border-color: #93c5fd;
+            box-shadow: 0 12px 28px rgba(2, 132, 199, 0.08);
+        }
+
+        .test-avatar-emblem {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            border: 1px solid #bfdbfe;
+            flex-shrink: 0;
+        }
+
+        .test-author-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.75rem;
+        }
+
+        .test-author-name {
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--slate-900);
+            line-height: 1.2;
+        }
+
+        .test-author-role {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+            margin-top: 2px;
+        }
+
+        .test-quote-text {
+            font-size: 0.85rem;
+            color: var(--slate-600);
+            line-height: 1.5;
+            font-style: italic;
+            margin: 0;
+        }
+
+        .test-stars-row {
+            color: #fbbf24;
+            font-size: 0.8rem;
+            margin-top: 0.85rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--slate-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* 7. SOPORTE & FAQ HUB PRO */
+        .support-hub-section {
+            max-width: 1280px;
+            margin: 5rem auto 6rem;
+            padding: 0 1.5rem;
+        }
+
+        .support-hub-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.35fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .support-channel-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .support-channel-card {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .support-channel-card:hover {
+            transform: translateY(-3px);
+            border-color: #93c5fd;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.1);
+        }
+
+        .support-ch-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .support-ch-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin-bottom: 2px;
+        }
+
+        .support-ch-sub {
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            font-weight: 600;
+        }
+
+        .faq-accordion-item {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .faq-accordion-item.active {
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.08);
+        }
+
+        .faq-q-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .faq-accordion-item.active .faq-q-title i {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .faq-a-desc {
+            font-size: 0.88rem;
+            color: var(--slate-600);
+            line-height: 1.6;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+            margin-top: 0;
+        }
+
+        .faq-accordion-item.active .faq-a-desc {
+            max-height: 250px;
+            opacity: 1;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--slate-100);
+        }
+
+        /* 8. BANNER PARA HOTELEROS */
+        .cta-banner-purple {
+            margin: 4rem auto 6rem;
+            max-width: 1280px;
+            padding: 0 1.5rem;
+        }
+
+        .cta-banner-card {
+            background: linear-gradient(135deg, #0f172a 0%, #0c4a6e 55%, #1e40af 100%);
+            border-radius: var(--radius-xl);
+            padding: 3.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /* 9. FOOTER OSCURO */
+        .site-dark-footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 4.5rem 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-inner-grid {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-brand-title span {
+            color: #38bdf8;
+        }
+
+        .footer-col-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-links-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .footer-links-list a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .footer-links-list a:hover {
+            color: #ffffff;
+            padding-left: 4px;
+        }
+
+        .footer-bottom-bar {
+            max-width: 1280px;
+            margin: 2rem auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* FLOATING WHATSAPP */
+        .floating-whatsapp-btn {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+            z-index: 999;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .floating-whatsapp-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+        }
+
+        /* MODAL MAPA */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        #hotel-leaflet-map {
+            width: 100%;
+            height: 420px;
+            border-radius: 16px;
+            border: 1px solid var(--slate-200);
+        }
+
+        .gps-radar-dot {
+            width: 22px;
+            height: 22px;
+            background: var(--primary);
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 rgba(79, 70, 229, 0.4);
+            animation: radarPulse 1.8s infinite;
+        }
+
+        @keyframes radarPulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.6); }
+            70% { box-shadow: 0 0 0 18px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        @media (max-width: 1100px) {
+            .directory-split-grid {
+                grid-template-columns: 240px 1fr;
+                gap: 1.5rem;
+            }
+            .features-4col-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-links-menu {
+                display: none;
+            }
+            .hero-trip-section {
+                padding: 7.5rem 1.25rem 4.5rem;
+            }
+            .trip-search-card {
+                grid-template-columns: 1fr;
+                padding: 0.85rem;
+            }
+            .trip-divider-v {
+                display: none;
+            }
+            .trip-search-actions-group {
+                width: 100%;
+                flex-direction: column;
+            }
+            .btn-trip-search, .btn-trip-gps {
+                width: 100%;
+                justify-content: center;
+            }
+            .directory-split-grid {
+                grid-template-columns: 1fr;
+            }
+            .directory-sidebar-filters {
+                position: static;
+            }
+            .support-hub-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            .footer-inner-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .site-nav-container {
+                top: 0.75rem;
+                padding: 0 0.75rem;
+            }
+            .site-nav-glass {
+                padding: 0.5rem 0.85rem;
+            }
+            .btn-guest-pill.hide-mobile {
+                display: none;
+            }
+            .hero-trip-title {
+                font-size: clamp(2rem, 7vw, 2.8rem);
+            }
+            .directory-section-pro {
+                padding: 3rem 1rem 3.5rem;
+            }
+            .directory-header-row {
+                margin-bottom: 1.5rem;
+            }
+            .features-section-minimal {
+                padding: 2.75rem 1rem 3rem;
+            }
+            .features-section-minimal .section-h2-title {
+                font-size: 1.65rem;
+            }
+            .features-section-minimal .section-desc-sub {
+                font-size: 0.84rem;
+            }
+            .features-4col-grid {
+                grid-template-columns: 1fr;
+                gap: 0.85rem;
+                margin-top: 1.5rem;
+            }
+            .feature-card-pillar {
+                padding: 1.1rem 1.2rem;
+                border-radius: 16px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 14px;
+            }
+            .feature-pillar-icon {
+                width: 46px;
+                height: 46px;
+                font-size: 1.25rem;
+                margin-bottom: 0;
+                flex-shrink: 0;
+                border-radius: 12px;
+            }
+            .feature-pillar-content h4 {
+                font-size: 0.98rem;
+                font-weight: 800;
+                margin-bottom: 0.2rem;
+                line-height: 1.3;
+            }
+            .feature-pillar-content p {
+                font-size: 0.82rem;
+                line-height: 1.42;
+                margin: 0;
+            }
+            .testimonials-section-compact {
+                padding: 2.5rem 1rem;
+            }
+            .testimonials-section-compact .section-h2-title {
+                font-size: 1.5rem;
+            }
+            .cta-banner-card {
+                padding: 2rem 1.25rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            .cta-banner-card .btn-primary-pill {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-trip-section {
+                padding: 6.5rem 1rem 3rem;
+            }
+            .trip-search-card {
+                grid-template-columns: 1fr;
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+            .trip-quick-chips-row {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hotels-pro-grid {
+                grid-template-columns: 1fr;
+            }
+            .hotel-price-and-cta {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.5rem;
+            }
+            .btn-hotel-options-trigger {
+                padding: 0.55rem 0.9rem;
+                font-size: 0.78rem;
+            }
+            .footer-inner-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .footer-bottom-bar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVBAR FLOTANTE -->
+    <header class="site-nav-container">
+        <div class="site-nav-glass">
+            <a href="index.html" class="brand-logo-unit">
+                <div class="brand-icon-sq">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <div class="brand-name-h3" id="site-brand-title">TuHotel<span>.pe</span></div>
+            </a>
+
+            <nav class="nav-links-menu">
+                <a href="#directorio" class="nav-item-link">Directorio</a>
+                <a href="javascript:void(0)" onclick="openMapModal()" class="nav-item-link"><i class="fa-solid fa-map-location-dot" style="color:var(--primary);"></i> Mapa GPS</a>
+                <a href="#beneficios" class="nav-item-link">Ventajas Huésped</a>
+                <a href="#testimonios" class="nav-item-link">Opiniones</a>
+                <a href="#faq" class="nav-item-link">FAQ</a>
+            </nav>
+
+            <div class="nav-actions-right">
+                <a href="afiliate.html" class="btn-guest-pill hide-mobile" title="¿Eres dueño de un hotel? Digitalízalo con TuHotel PMS">
+                    <i class="fa-solid fa-hotel" style="color:var(--primary);"></i> ¿Tienes un Hotel?
+                </a>
+                <a href="register-guest.html" class="btn-guest-pill hide-mobile">Soy Huésped</a>
+                <a href="login.html" class="btn-primary-pill"><i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO TRIP.COM STYLE CON FONDO PANORÁMICO -->
+    <section class="hero-trip-section" id="inicio">
+        <div class="hero-trip-inner">
+            <h1 class="hero-trip-title" id="hero-brand-title">
+                TuHotel<span class="trip-dot">.pe</span>
+            </h1>
+            <p class="hero-trip-sub">
+                Encuentra tu hotel ideal y reserva directo con recepción por WhatsApp sin comisiones ni intermediarios.
+            </p>
+
+            <!-- HORIZONTAL SEARCH BAR ELEVADA (EN UNA SOLA FILA ESTRICTA CON BUSCAR + MAPA GPS) -->
+            <div class="trip-search-card">
+                <!-- COL 1: DESTINO / HOTEL -->
+                <div class="trip-search-col" style="position:relative;">
+                    <i class="fa-solid fa-location-dot trip-icon"></i>
+                    <div class="trip-col-content">
+                        <label class="trip-col-label">Destino / Hotel</label>
+                        <input type="text" id="search-query" class="trip-col-input" oninput="handleSearchInput(this.value)" placeholder="¿A dónde quieres ir? (Ej. Tacna, Lima)" autocomplete="off">
+                    </div>
+                    <div class="autocomplete-dropdown" id="search-autocomplete-box"></div>
+                </div>
+
+                <div class="trip-divider-v"></div>
+
+                <!-- COL 2: FECHA -->
+                <div class="trip-search-col">
+                    <i class="fa-regular fa-calendar trip-icon"></i>
+                    <div class="trip-col-content">
+                        <label class="trip-col-label">Fecha de Llegada</label>
+                        <input type="date" id="search-date" class="trip-col-input" style="cursor:pointer;">
+                    </div>
+                </div>
+
+                <!-- COL 3: BOTONES BUSCAR + MAPA GPS EN LA MISMA FILA -->
+                <div class="trip-search-actions-group">
+                    <button type="button" class="btn-trip-search" onclick="filterHotelsDirectory()">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                    </button>
+                    <button type="button" class="btn-trip-gps" onclick="openMapModal()" title="Explorar hoteles en el mapa satelital">
+                        <i class="fa-solid fa-map-location-dot"></i> Mapa GPS
+                    </button>
+                </div>
+            </div>
+
+            <!-- CHIPS RÁPIDOS DEBAJO DEL BUSCADOR -->
+            <div class="trip-quick-chips-row">
+                <span style="font-size:0.8rem; font-weight:700; color:rgba(255,255,255,0.9); margin-right:4px;">Populares:</span>
+                <button type="button" class="trip-chip-btn" onclick="quickSearchCity('')">Todos</button>
+                <button type="button" class="trip-chip-btn" onclick="quickSearchCity('Tacna')">Tacna</button>
+                <button type="button" class="trip-chip-btn" onclick="quickSearchCity('Lima')">Lima</button>
+                <button type="button" class="trip-chip-btn" onclick="quickSearchCity('Cusco')">Cusco</button>
+                <button type="button" class="trip-chip-btn" onclick="quickSearchCity('Arequipa')">Arequipa</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. DIRECTORIO PRO CON SIDEBAR FILTROS -->
+    <section class="directory-section-pro" id="directorio">
+        <div class="directory-container-pro">
+            <!-- TOP HEADER WITH ACTIONS -->
+            <div class="directory-header-row">
+                <div>
+                    <div class="section-pill-tag"><i class="fa-solid fa-hotel"></i> Directorio Oficial</div>
+                    <h2 class="section-h2-title" style="margin-top:0.4rem;">Hoteles Disponibles</h2>
+                    <p style="color:var(--slate-600); font-size:0.95rem; margin:0.35rem 0 0;">Tarifas directas de recepción y contacto inmediato por WhatsApp.</p>
+                </div>
+                <div>
+                    <button type="button" class="btn-guest-pill" onclick="openMapModal()" style="background:#ffffff; border-color:var(--slate-200); box-shadow:0 2px 10px rgba(0,0,0,0.03);">
+                        <i class="fa-solid fa-map-location-dot" style="color:var(--primary);"></i> Ver Todos en Mapa GPS
+                    </button>
+                </div>
+            </div>
+
+            <div class="directory-split-grid">
+                <!-- LEFT SIDEBAR FILTROS -->
+                <aside class="directory-sidebar-filters">
+                    <div class="filter-card-box">
+                        <div class="filter-header-title">
+                            <span style="font-weight:800; font-size:0.95rem; color:var(--slate-900); display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-sliders" style="color:var(--primary);"></i> Filtros
+                            </span>
+                            <button type="button" class="btn-clear-filter" onclick="clearDirectoryFilters()">Limpiar</button>
+                        </div>
+
+                        <!-- 1. CIUDAD -->
+                        <div class="filter-group-block">
+                            <label class="filter-group-label">Destino / Ciudad</label>
+                            <div class="filter-city-list" id="sidebar-city-list">
+                                <button type="button" class="filter-city-pill active" onclick="setFilterCity('', this)">Todos los Destinos</button>
+                                <button type="button" class="filter-city-pill" onclick="setFilterCity('Tacna', this)"><i class="fa-solid fa-location-dot"></i> Tacna</button>
+                                <button type="button" class="filter-city-pill" onclick="setFilterCity('Lima', this)"><i class="fa-solid fa-location-dot"></i> Lima</button>
+                                <button type="button" class="filter-city-pill" onclick="setFilterCity('Cusco', this)"><i class="fa-solid fa-location-dot"></i> Cusco</button>
+                                <button type="button" class="filter-city-pill" onclick="setFilterCity('Arequipa', this)"><i class="fa-solid fa-location-dot"></i> Arequipa</button>
+                            </div>
+                        </div>
+
+                        <!-- 2. SERVICIOS -->
+                        <div class="filter-group-block">
+                            <label class="filter-group-label">Servicios</label>
+                            <label class="filter-checkbox-item">
+                                <input type="checkbox" id="filter-wifi" onchange="applySidebarFilters()">
+                                <span><i class="fa-solid fa-wifi" style="color:#0284c7;"></i> Con Wi-Fi</span>
+                            </label>
+                            <label class="filter-checkbox-item">
+                                <input type="checkbox" id="filter-breakfast" onchange="applySidebarFilters()">
+                                <span><i class="fa-solid fa-mug-saucer" style="color:#0d9488;"></i> Con Desayuno</span>
+                            </label>
+                            <label class="filter-checkbox-item">
+                                <input type="checkbox" id="filter-reception" onchange="applySidebarFilters()">
+                                <span><i class="fa-solid fa-bell-concierge" style="color:#2563eb;"></i> Recepción 24h</span>
+                            </label>
+                        </div>
+
+                        <!-- 3. ORDENAR -->
+                        <div class="filter-group-block">
+                            <label class="filter-group-label">Ordenar Por</label>
+                            <select id="filter-sort-by" class="filter-select-input" onchange="applySidebarFilters()">
+                                <option value="recent">Más recientes</option>
+                                <option value="price_asc">Menor precio</option>
+                                <option value="gps">Más cercanos a mí (GPS)</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. BANNER GPS INTERACTIVO -->
+                        <div class="sidebar-gps-card" onclick="openMapModal()">
+                            <div style="font-weight:800; font-size:0.85rem; color:#ffffff; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                                <i class="fa-solid fa-satellite"></i> Mapa Satelital
+                            </div>
+                            <p style="font-size:0.75rem; color:rgba(255,255,255,0.85); margin:0 0 10px; line-height:1.4;">Ubica los hoteles y calcula tu ruta directa.</p>
+                            <span style="font-size:0.75rem; background:rgba(255,255,255,0.25); color:#ffffff; padding:4px 10px; border-radius:6px; font-weight:700; display:inline-block;">Abrir Mapa GPS &rarr;</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- RIGHT HOTEL LIST -->
+                <main class="directory-main-cards">
+                    <div class="directory-results-bar">
+                        <span id="hotels-count-badge" style="font-size:0.88rem; font-weight:800; color:var(--slate-700);">Cargando hoteles...</span>
+                    </div>
+
+                    <div class="hotels-pro-grid" id="hotels-grid-container">
+                        <div style="grid-column: 1 / -1; text-align:center; padding:3.5rem; color:var(--slate-500);">
+                            <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; color:var(--primary); margin-bottom:0.75rem;"></i>
+                            <p>Cargando hoteles disponibles...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. BENEFICIOS PARA EL HUÉSPED (4 COLUMNAS ELEGANTES - FULL WIDTH OSCURO PORTADA) -->
+    <section class="features-section-minimal" id="beneficios">
+        <div class="features-minimal-inner">
+            <div style="text-align:center; max-width:700px; margin:0 auto;">
+                <div class="section-pill-tag">Ventajas para Huéspedes</div>
+                <h2 class="section-h2-title" style="margin-top:0.4rem;">¿Por qué TuHotel.pe?</h2>
+                <p class="section-desc-sub" style="margin-bottom:0;">La forma más directa, transparente y moderna de reservar tu hotel en Perú.</p>
+            </div>
+
+            <div class="features-4col-grid">
+                <!-- COL 1: WHATSAPP -->
+                <div class="feature-card-pillar">
+                    <div class="feature-pillar-icon" style="background:rgba(34, 197, 94, 0.16); color:#4ade80; border:1px solid rgba(34, 197, 94, 0.35);">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div class="feature-pillar-content">
+                        <h4>Trato Directo con Recepción</h4>
+                        <p>Habla en tiempo real con recepción por WhatsApp para confirmar disponibilidad y habitaciones sin intermediarios.</p>
+                    </div>
+                </div>
+
+                <!-- COL 2: GPS -->
+                <div class="feature-card-pillar">
+                    <div class="feature-pillar-icon" style="background:rgba(56, 189, 248, 0.16); color:#38bdf8; border:1px solid rgba(56, 189, 248, 0.35);">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div class="feature-pillar-content">
+                        <h4>Ruta Satelital & GPS</h4>
+                        <p>Geolocalización precisa de cada hotel. Abre tu ruta guiada paso a paso en Google Maps con un solo clic.</p>
+                    </div>
+                </div>
+
+                <!-- COL 3: QR -->
+                <div class="feature-card-pillar">
+                    <div class="feature-pillar-icon" style="background:rgba(168, 85, 247, 0.16); color:#c084fc; border:1px solid rgba(168, 85, 247, 0.35);">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <div class="feature-pillar-content">
+                        <h4>Portal Huésped & WiFi</h4>
+                        <p>Escanea el código QR de tu cuarto para obtener la clave Wi-Fi, carta de servicios y contacto con conserjería.</p>
+                    </div>
+                </div>
+
+                <!-- COL 4: TARIFAS -->
+                <div class="feature-card-pillar">
+                    <div class="feature-pillar-icon" style="background:rgba(20, 184, 166, 0.16); color:#2dd4bf; border:1px solid rgba(20, 184, 166, 0.35);">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="feature-pillar-content">
+                        <h4>Tarifas Oficiales en Vivo</h4>
+                        <p>Precios y disponibilidad gestionados directamente por el software PMS del hotel, sin cobros ocultos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. TESTIMONIOS (EXPERIENCIAS DE HUÉSPEDES) -->
+    <section class="testimonials-section-compact" id="testimonios">
+        <div style="text-align:center; max-width:620px; margin:0 auto;">
+            <div class="section-pill-tag" style="margin-bottom:0.6rem;">Opiniones Reales</div>
+            <h2 class="section-h2-title" style="margin-top:0; font-size:1.85rem;">Experiencias de Huéspedes</h2>
+            <p class="section-desc-sub" style="margin-bottom:0; font-size:0.88rem;">Opiniones verificadas de viajeros que reservaron directo.</p>
+        </div>
+
+        <div class="testimonials-auto-grid" id="testimonials-cards-container" style="margin-top:1.85rem;">
+            <div style="text-align:center; padding:1.5rem; color:var(--slate-500); width:100%;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary); margin-bottom:0.5rem; display:block;"></i>
+                Cargando opiniones de hoteles...
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. CENTRO DE AYUDA & PREGUNTAS FRECUENTES (UNIFICADO) -->
+    <section class="support-hub-section" id="faq">
+        <!-- HEADER CENTRADO EN ARMONÍA CON EL RESTO DE SECCIONES -->
+        <div class="support-section-header">
+            <div class="section-pill-tag" style="margin-bottom:0.5rem;">FAQ & Ayuda</div>
+            <h2 class="section-h2-title" style="margin-top:0; font-size:1.85rem;">Preguntas Frecuentes</h2>
+            <p class="section-desc-sub" style="margin-bottom:0; font-size:0.88rem;">Respuestas directas y soporte para huéspedes y hoteleros.</p>
+        </div>
+
+        <!-- TARJETA UNIFICADA A TODO EL ANCHO -->
+        <div class="support-unified-box">
+            <!-- PANEL IZQUIERDO: CANALES DE ATENCIÓN DIRECTA -->
+            <div class="support-channels-panel">
+                <div>
+                    <h3 class="panel-heading-title">
+                        <i class="fa-solid fa-headset" style="color:var(--primary);"></i> Canales de Atención
+                    </h3>
+                    <p class="panel-heading-sub">
+                        Atención directa en vivo sin intermediarios.
+                    </p>
+
+                    <div class="support-channel-cards">
+                        <a href="https://wa.me/51930372814" target="_blank" class="support-channel-card">
+                            <div class="support-ch-icon" style="background:#dcfce7; color:#16a34a;">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div>
+                                <div class="support-ch-title">WhatsApp de Asistencia</div>
+                                <div class="support-ch-sub">+51 930 372 814 &bull; En vivo</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right support-ch-arrow"></i>
+                        </a>
+
+                        <a href="mailto:soporte@tuhotel.pe" class="support-channel-card">
+                            <div class="support-ch-icon" style="background:#eff6ff; color:#0284c7;">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <div class="support-ch-title">Correo Electrónico</div>
+                                <div class="support-ch-sub">soporte@tuhotel.pe</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right support-ch-arrow"></i>
+                        </a>
+
+                        <a href="afiliate.html" class="support-channel-card">
+                            <div class="support-ch-icon" style="background:#f5f3ff; color:#7c3aed;">
+                                <i class="fa-solid fa-hotel"></i>
+                            </div>
+                            <div>
+                                <div class="support-ch-title">¿Tienes un Hotel?</div>
+                                <div class="support-ch-sub">Publica tu hotel con software PMS</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right support-ch-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: ACORDEÓN DE PREGUNTAS FRECUENTES -->
+            <div class="support-faqs-panel">
+                <h3 class="panel-heading-title">
+                    <i class="fa-regular fa-circle-question" style="color:var(--primary);"></i> Dudas Habituales
+                </h3>
+                <p class="panel-heading-sub">
+                    Consultas sobre reservas, pagos y servicios.
+                </p>
+
+                <div id="faq-accordion-container">
+                    <div style="text-align:center; padding:1.5rem; color:var(--slate-500);">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:1.3rem; color:var(--primary); margin-bottom:0.4rem; display:block;"></i>
+                        Cargando preguntas frecuentes...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. BANNER PARA DUEÑOS DE HOTELES -->
+    <div class="cta-banner-purple">
+        <div class="cta-banner-card">
+            <div>
+                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); padding:4px 14px; border-radius:var(--radius-pill); font-size:0.75rem; font-weight:800; color:#ffffff; margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
+                    <i class="fa-solid fa-hotel" style="color:#38bdf8;"></i> Para Hoteleros
+                </div>
+                <h3 style="color:#ffffff; font-size:2.1rem; font-weight:900; line-height:1.2; margin-bottom:0.75rem;">¿Tienes un Hotel?</h3>
+                <p style="color:#e2e8f0; max-width:560px; font-size:0.95rem; line-height:1.6;">Digitaliza tu recepción, gestiona habitaciones y recibe reservas directas sin comisiones.</p>
+            </div>
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                <a href="afiliate.html" class="btn-primary-pill" style="background:linear-gradient(135deg, #0284c7, #38bdf8); color:#ffffff; text-decoration:none; display:inline-flex; align-items:center; gap:8px; font-weight:800; padding:0.95rem 1.85rem; border-radius:var(--radius-pill); box-shadow:0 8px 25px rgba(2,132,199,0.4); font-size:0.95rem;">
+                    <i class="fa-solid fa-rocket"></i> Conocer Software PMS &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. FOOTER OSCURO PROFESIONAL -->
+    <footer class="site-dark-footer">
+        <div class="footer-inner-grid">
+            <div>
+                <div class="footer-brand-title" id="footer-brand-title">TuHotel<span>.pe</span></div>
+                <p style="font-size:0.85rem; color:#94a3b8; line-height:1.6; margin-bottom:1.25rem;">
+                    La plataforma y software PMS líder para hoteles en Perú. Conectamos recepciones y huéspedes en tiempo real con 0% comisiones.
+                </p>
+                <div style="display:flex; gap:12px; font-size:1.4rem; color:#cbd5e1;">
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Para Huéspedes</div>
+                <ul class="footer-links-list">
+                    <li><a href="#directorio">Explorar Hoteles</a></li>
+                    <li><a href="javascript:void(0)" onclick="openMapModal()">Mapa GPS Satelital</a></li>
+                    <li><a href="register-guest.html">Registro de Huéspedes</a></li>
+                    <li><a href="#beneficios">Ventajas del Huésped</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Para Hoteleros</div>
+                <ul class="footer-links-list">
+                    <li><a href="afiliate.html">Afiliar mi Hotel</a></li>
+                    <li><a href="login.html">Ingreso al Panel PMS</a></li>
+                    <li><a href="afiliate.html#modulos">Módulos del Sistema</a></li>
+                    <li><a href="afiliate.html#precios">Planes & Membresías</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Legal & Soporte</div>
+                <ul class="footer-links-list">
+                    <li><a href="terminos.html">Términos del Servicio</a></li>
+                    <li><a href="privacidad.html">Privacidad</a></li>
+                    <li><a href="login.html">Centro de Ayuda</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <div>&copy; <span id="footer-year">2026</span> TuHotel.pe &bull; Todos los derechos reservados.</div>
+            <div>Hecho con excelencia para la hotelería peruana.</div>
+        </div>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+    <a href="https://wa.me/51930372814" target="_blank" class="floating-whatsapp-btn" title="Chatear por WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- MODAL 1: MAPA SATELITAL GPS & UBICACIÓN -->
+    <div id="map-modal" class="omni-fullscreen-modal-overlay">
+        <div class="omni-modal-box">
+            <div class="omni-modal-header">
+                <div>
+                    <h3 style="margin:0; font-size:1.2rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-map-location-dot" style="color:#0284c7;"></i> Mapa Satelital de Alojamientos
+                    </h3>
+                    <p style="margin:2px 0 0; font-size:0.8rem; color:#64748b;">Ubica los hoteles y calcula la distancia a tu posición actual.</p>
+                </div>
+                <button type="button" class="omni-modal-close-btn" onclick="closeMapModal()" title="Cerrar Mapa">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="hotel-leaflet-map"></div>
+            <div style="padding:1rem 1.6rem; background:#f8fafc; border-top:1px solid var(--slate-200); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:0.82rem; color:#64748b;">
+                    <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#6366f1; margin-right:4px;"></span> Tu ubicación (GPS)
+                    &nbsp;&bull;&nbsp;
+                    <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#0284c7; margin-right:4px;"></span> Hoteles verificados
+                </div>
+                <button type="button" class="btn-primary-pill" onclick="detectUserLocationAndSort()" style="font-size:0.82rem; padding:6px 16px;">
+                    <i class="fa-solid fa-crosshairs"></i> Centrar en Mi GPS
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: VISTA PREVIA DE FOTOS & GALERÍA DE HABITACIONES -->
+    <div id="hotel-gallery-modal" class="omni-fullscreen-modal-overlay">
+        <div class="omni-modal-box">
+            <!-- HEADER -->
+            <div class="omni-modal-header">
+                <div>
+                    <h3 id="gallery-hotel-title" style="margin:0; font-size:1.2rem; font-weight:900; color:#0f172a;">Hotel</h3>
+                    <div id="gallery-hotel-location" style="margin:3px 0 0; font-size:0.82rem; color:#64748b;"></div>
+                </div>
+                <button type="button" class="omni-modal-close-btn" onclick="closeHotelGalleryModal()" title="Cerrar Galería">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- MAIN VIEWER -->
+            <div class="gallery-main-viewer">
+                <img id="gallery-main-image" src="" class="gallery-main-img" alt="Vista Previa">
+                
+                <button type="button" class="gallery-nav-btn prev" onclick="prevGalleryPhoto()" title="Foto anterior">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="gallery-nav-btn next" onclick="nextGalleryPhoto()" title="Siguiente foto">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <span id="gallery-counter-tag" class="gallery-counter-pill">Foto 1 de 5</span>
+                <span id="gallery-caption-tag" class="gallery-caption-pill">Habitación</span>
+            </div>
+
+            <!-- THUMBNAILS STRIP -->
+            <div id="gallery-thumbs-container" class="gallery-thumbnails-strip"></div>
+
+            <!-- FOOTER WITH DIRECT ACTIONS -->
+            <div class="gallery-footer-actions">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; width:100%; justify-content:flex-start;">
+                    <a id="gallery-btn-register" href="#" class="btn-primary-pill" style="font-size:0.85rem; padding:8px 18px; text-decoration:none; background:linear-gradient(135deg, #4f46e5, #6366f1); box-shadow:0 4px 14px rgba(79,70,229,0.35);">
+                        <i class="fa-solid fa-calendar-check"></i> Registrarse / Reservar
+                    </a>
+                    <a id="gallery-btn-wa" href="#" target="_blank" class="btn-primary-pill" style="font-size:0.85rem; padding:8px 18px; text-decoration:none; background:#16a34a; box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp Recepción
+                    </a>
+                    <button type="button" id="gallery-btn-maps" class="trip-chip-btn" style="color:var(--slate-700); background:#f1f5f9; border:1px solid #cbd5e1; font-size:0.82rem; padding:8px 14px; cursor:pointer;">
+                        <i class="fa-solid fa-diamond-turn-right" style="color:#0284c7;"></i> Abrir Ruta en Google Maps
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let allHotelsCache = [];
+        let userLocation = null;
+        let leafletMapInstance = null;
+        let mapMarkers = [];
+        let userGpsMarker = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Cargar Branding configurado en SuperAdmin
+            if (typeof loadSaaSBranding === 'function') {
+                await loadSaaSBranding();
+            }
+
+            const saasName = getSaaSName();
+            const primaryColor = getSaaSPrimaryColor() || '#4f46e5';
+            const saasFont = getSaaSFont() || 'Plus Jakarta Sans';
+
+            // Inyectar variables dinámicas de SuperAdmin en CSS
+            document.documentElement.style.setProperty('--primary', primaryColor);
+            document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${primaryColor} 0%, #7c3aed 50%, #d946ef 100%)`);
+            
+            if (saasFont && saasFont !== 'Inter') {
+                document.body.style.fontFamily = `'${saasFont}', 'Plus Jakarta Sans', sans-serif`;
+            }
+
+            document.title = `${saasName} - Encuentra tu Hotel Ideal y Reserva Directo`;
+            let cleanBrand = (saasName || 'TuHotel').replace(/\.pe$/i, '');
+            if (cleanBrand.toLowerCase() === 'tuhotel' || cleanBrand.toLowerCase() === 'hoteles') {
+                cleanBrand = 'TuHotel';
+            }
+            const brandElem = document.getElementById('site-brand-title');
+            if (brandElem) brandElem.innerHTML = `${cleanBrand}<span>.pe</span>`;
+            const heroBrandElem = document.getElementById('hero-brand-title');
+            if (heroBrandElem) heroBrandElem.innerHTML = `${cleanBrand}<span class="trip-dot">.pe</span>`;
+            const footerBrandElem = document.getElementById('footer-brand-title');
+            if (footerBrandElem) footerBrandElem.innerHTML = `${cleanBrand}<span>.pe</span>`;
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            // WhatsApp flotante dinámico con el teléfono configurado por SuperAdmin
+            const waFloating = document.querySelector('.floating-whatsapp-btn');
+            if (waFloating) {
+                const saasPhone = window.getCleanWhatsAppNumber ? window.getCleanWhatsAppNumber(window.getSaaSPhone()) : '51930372814';
+                waFloating.href = `https://wa.me/${saasPhone}?text=${encodeURIComponent(`Hola ${saasName}, deseo consultar tarifas y disponibilidad de hoteles.`)}`;
+            }
+
+            // Set default date
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('search-date');
+            if (dateInput) dateInput.value = today;
+
+            // Detectar GPS silenciosamente
+            tryDetectGPSQuietly();
+
+            await loadHotelsDirectory();
+            await loadDynamicTestimonials();
+            await loadDynamicFAQs();
+        });
+
+        let activeSidebarCity = '';
+
+        function setFilterCity(city, btnElem) {
+            activeSidebarCity = city;
+            document.querySelectorAll('.filter-city-pill').forEach(b => b.classList.remove('active'));
+            if (btnElem) btnElem.classList.add('active');
+            applySidebarFilters();
+        }
+
+        function clearDirectoryFilters() {
+            activeSidebarCity = '';
+            const sq = document.getElementById('search-query');
+            if (sq) sq.value = '';
+            const fw = document.getElementById('filter-wifi');
+            if (fw) fw.checked = false;
+            const fb = document.getElementById('filter-breakfast');
+            if (fb) fb.checked = false;
+            const fr = document.getElementById('filter-reception');
+            if (fr) fr.checked = false;
+            const fs = document.getElementById('filter-sort-by');
+            if (fs) fs.value = 'recent';
+
+            document.querySelectorAll('.filter-city-pill').forEach((b, idx) => {
+                if (idx === 0) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+            applySidebarFilters();
+        }
+
+        function applySidebarFilters() {
+            const query = (document.getElementById('search-query')?.value || '').toLowerCase().trim();
+            const onlyWifi = document.getElementById('filter-wifi')?.checked;
+            const onlyBreakfast = document.getElementById('filter-breakfast')?.checked;
+            const sortBy = document.getElementById('filter-sort-by')?.value || 'recent';
+
+            let filtered = allHotelsCache.filter(h => {
+                const name = (h.name || '').toLowerCase();
+                const addr = (h.address || '').toLowerCase();
+                const city = (h.city || '').toLowerCase();
+                const settings = h.settings || {};
+                const gDir = settings.guest_directory || {};
+
+                // Texto de búsqueda
+                if (query && !name.includes(query) && !addr.includes(query) && !city.includes(query)) {
+                    return false;
+                }
+
+                // Filtro lateral de Ciudad
+                if (activeSidebarCity) {
+                    const targetCity = activeSidebarCity.toLowerCase();
+                    if (!city.includes(targetCity) && !addr.includes(targetCity) && !name.includes(targetCity)) {
+                        return false;
+                    }
+                }
+
+                // Filtros de servicios
+                if (onlyWifi && !gDir.wifi_ssid) return false;
+                if (onlyBreakfast && !gDir.breakfast_hours) return false;
+
+                return true;
+            });
+
+            // Ordenamiento
+            if (sortBy === 'price_asc') {
+                filtered.sort((a, b) => {
+                    const priceA = parseFloat(a.min_price || a.settings?.starting_price || 9999);
+                    const priceB = parseFloat(b.min_price || b.settings?.starting_price || 9999);
+                    return priceA - priceB;
+                });
+            } else if (sortBy === 'gps' && userLocation) {
+                filtered.sort((a, b) => {
+                    const locA = a.settings?.location;
+                    const locB = b.settings?.location;
+                    const distA = locA?.lat ? calculateGeoDistance(userLocation.lat, userLocation.lng, locA.lat, locA.lng) : 9999;
+                    const distB = locB?.lat ? calculateGeoDistance(userLocation.lat, userLocation.lng, locB.lat, locB.lng) : 9999;
+                    return distA - distB;
+                });
+            }
+
+            // Actualizar badge de contador
+            const badge = document.getElementById('hotels-count-badge');
+            if (badge) {
+                badge.textContent = `Mostrando ${filtered.length} alojamiento${filtered.length === 1 ? '' : 's'} disponible${filtered.length === 1 ? '' : 's'}`;
+            }
+
+            renderHotelsList(filtered);
+        }
+
+        function tryDetectGPSQuietly() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        if (allHotelsCache.length > 0) {
+                            applySidebarFilters();
+                        }
+                    },
+                    () => {},
+                    { enableHighAccuracy: true, timeout: 8000 }
+                );
+            }
+        }
+
+        async function loadHotelsDirectory() {
+            const container = document.getElementById('hotels-grid-container');
+
+            try {
+                const { data: hotels, error } = await supabaseClient
+                    .from('hotels')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allHotelsCache = hotels || [];
+                applySidebarFilters();
+            } catch (e) {
+                console.warn('Error cargando hoteles:', e);
+                container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:2rem; color:#64748b;">No se pudieron cargar los hoteles.</div>`;
+            }
+        }
+
+        // RENDERIZAR LISTA DE HOTELES CON COORDENADAS GPS EXACTAS
+        function renderHotelsList(hotels) {
+            const container = document.getElementById('hotels-grid-container');
+
+            if (!hotels || hotels.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:4rem 2rem; background:#ffffff; border:1.5px dashed #cbd5e1; border-radius:20px; color:#64748b;">
+                        <i class="fa-solid fa-hotel" style="font-size:2.5rem; color:#94a3b8; margin-bottom:1rem; display:block;"></i>
+                        <h4 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-bottom:0.5rem;">No se encontraron alojamientos</h4>
+                        <p style="margin:0 0 1.25rem; font-size:0.9rem;">Prueba limpiando los filtros o cambiando el término de búsqueda.</p>
+                        <button type="button" class="btn-primary-pill" onclick="clearDirectoryFilters()">Ver Todos los Hoteles</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const fallbackGradients = [
+                'linear-gradient(135deg, #0f172a 0%, #0369a1 100%)',
+                'linear-gradient(135deg, #075985 0%, #0284c7 100%)',
+                'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+                'linear-gradient(135deg, #134e4a 0%, #0d9488 100%)'
+            ];
+
+            container.innerHTML = hotels.map((hotel, idx) => {
+                const settings = hotel.settings || {};
+                const gDir = settings.guest_directory || {};
+                const loc = settings.location || {};
+                const hasWifi = !!gDir.wifi_ssid;
+                const hasBreakfast = !!gDir.breakfast_hours;
+                const hLat = loc.lat || (hotel.latitude ? parseFloat(hotel.latitude) : null);
+                const hLng = loc.lng || (hotel.longitude ? parseFloat(hotel.longitude) : null);
+
+                let scoreTag = '<i class="fa-solid fa-star" style="color:#fbbf24;"></i> 4.8 Excelente';
+                if (userLocation && hLat && hLng) {
+                    const distKm = calculateGeoDistance(userLocation.lat, userLocation.lng, hLat, hLng);
+                    if (distKm !== null) {
+                        scoreTag = `<i class="fa-solid fa-location-arrow"></i> a ${distKm} km de ti`;
+                    }
+                }
+
+                const logoImg = settings.logo || '';
+                const fallbackGrad = fallbackGradients[idx % fallbackGradients.length];
+                const bgStyle = logoImg ? `background-image: url('${logoImg}');` : `background: ${fallbackGrad};`;
+
+                const waPhone = (settings.whatsapp || settings.phone || hotel.phone || '').replace(/\D/g, '');
+                const waUrl = waPhone ? `https://wa.me/51${waPhone.replace(/^51/, '')}?text=${encodeURIComponent('Hola ' + hotel.name + ', vi su hotel en TuHotel.pe y deseo consultar disponibilidad y tarifas directas.')}` : '';
+
+                const hotelPriceHtml = hotel.min_price 
+                    ? `S/ ${parseFloat(hotel.min_price).toFixed(2)} <small style="font-size:0.75rem; font-weight:normal; color:#64748b;">/noche</small>`
+                    : (settings.starting_price 
+                        ? `S/ ${parseFloat(settings.starting_price).toFixed(2)} <small style="font-size:0.75rem; font-weight:normal; color:#64748b;">/noche</small>`
+                        : `<span style="font-size:0.85rem; color:#0284c7; font-weight:800;">Tarifa Directa</span>`);
+
+                return `
+                    <div class="hotel-clean-card">
+                        <div class="hotel-img-frame" style="${bgStyle}" onclick="openHotelGalleryModal('${hotel.id}')" title="Haz clic para ver fotos e instalaciones">
+                            ${!logoImg ? `
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; padding:1rem; z-index:2; position:relative;">
+                                    <div style="width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; font-size:1.5rem; backdrop-filter:blur(8px);">
+                                        <i class="fa-solid fa-hotel"></i>
+                                    </div>
+                                    <span style="font-size:0.92rem; font-weight:800; color:#ffffff; letter-spacing:0.2px;">${escapeHTML(hotel.name)}</span>
+                                </div>
+                            ` : ''}
+                            <span class="badge-verified-pill"><i class="fa-solid fa-circle-check"></i> Verificado</span>
+                            <span class="badge-camera-photos"><i class="fa-solid fa-images"></i> Ver Fotos</span>
+                            <span class="badge-gps-distance">${scoreTag}</span>
+                        </div>
+                        <div class="hotel-body-box">
+                            <div>
+                                <h4 class="hotel-name-h4" onclick="openHotelGalleryModal('${hotel.id}')" style="cursor:pointer;" title="Ver fotos">${escapeHTML(hotel.name)}</h4>
+                                <div class="hotel-address-p">
+                                    <i class="fa-solid fa-location-dot" style="color:var(--primary); font-size:0.95rem;"></i>
+                                    <span>${escapeHTML(hotel.address || 'Ubicación céntrica')}</span>
+                                </div>
+                                <div class="hotel-amenities-row">
+                                    <span class="amenity-chip"><i class="fa-solid fa-wifi" style="color:#0284c7;"></i> Wi-Fi</span>
+                                    <span class="amenity-chip"><i class="fa-solid fa-bell-concierge" style="color:#2563eb;"></i> Recepción 24h</span>
+                                    ${hasBreakfast ? '<span class="amenity-chip"><i class="fa-solid fa-mug-saucer" style="color:#0d9488;"></i> Desayuno</span>' : ''}
+                                    <span class="amenity-chip"><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> 0% Comisión</span>
+                                </div>
+                            </div>
+
+                            <!-- FOOTER CON PRECIO Y MENÚ DESPLEGABLE INTERACTIVO -->
+                            <div class="hotel-price-and-cta">
+                                <div>
+                                    <div class="price-label-lead">Tarifa Recepción</div>
+                                    <div class="price-amount-bold">${hotelPriceHtml}</div>
+                                </div>
+                                <div class="hotel-actions-menu-wrapper">
+                                    <button type="button" class="btn-hotel-options-trigger" onclick="toggleHotelOptions(event, this)">
+                                        <span>Ver Opciones</span>
+                                        <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;"></i>
+                                    </button>
+
+                                    <div class="hotel-options-dropdown">
+                                        <!-- 1. REGISTRARSE / RESERVAR EN ESTE HOTEL -->
+                                        <a href="register-guest.html?hotel_id=${hotel.id}" class="hotel-option-item opt-register">
+                                            <i class="fa-solid fa-calendar-check"></i>
+                                            <div>
+                                                <div style="font-weight:800; font-size:0.84rem;">Registrarse / Reservar</div>
+                                                <small style="font-size:0.7rem; color:#4f46e5; font-weight:600;">Reserva directa en este hotel</small>
+                                            </div>
+                                        </a>
+
+                                        <!-- 2. VER FOTOS & GALERÍA MODAL -->
+                                        <div onclick="openHotelGalleryModal('${hotel.id}')" class="hotel-option-item opt-gallery" style="cursor:pointer;">
+                                            <i class="fa-solid fa-images"></i>
+                                            <div>
+                                                <div style="font-weight:800; font-size:0.84rem;">Ver Fotos & Galería</div>
+                                                <small style="font-size:0.7rem; color:#0284c7; font-weight:600;">Cuartos e instalaciones</small>
+                                            </div>
+                                        </div>
+
+                                        <!-- 3. WHATSAPP RECEPCIÓN -->
+                                        ${waUrl ? `
+                                            <a href="${waUrl}" target="_blank" class="hotel-option-item opt-wa">
+                                                <i class="fa-brands fa-whatsapp"></i>
+                                                <div>
+                                                    <div style="font-weight:800; font-size:0.84rem;">WhatsApp Recepción</div>
+                                                    <small style="font-size:0.7rem; color:#16a34a; font-weight:600;">Hablar en vivo con recepción</small>
+                                                </div>
+                                            </a>
+                                        ` : ''}
+
+                                        <!-- 4. RUTA EN GOOGLE MAPS -->
+                                        <div onclick="openGoogleMapsRoute('${hotel.id}')" class="hotel-option-item opt-maps" style="cursor:pointer;">
+                                            <i class="fa-solid fa-diamond-turn-right"></i>
+                                            <div>
+                                                <div style="font-weight:800; font-size:0.84rem;">Ruta en Google Maps</div>
+                                                <small style="font-size:0.7rem; color:#0284c7; font-weight:500;">Desde tu ubicación actual (GPS)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===================================
+        // NAVEGACIÓN GPS EN GOOGLE MAPS
+        // ===================================
+        function openGoogleMapsRoute(hotelId) {
+            const hotel = allHotelsCache.find(h => h.id === hotelId);
+            if (!hotel) return;
+
+            const loc = hotel.settings?.location || {};
+            const hLat = loc.lat || (hotel.latitude ? parseFloat(hotel.latitude) : null);
+            const hLng = loc.lng || (hotel.longitude ? parseFloat(hotel.longitude) : null);
+
+            const launchRoute = (uLat, uLng) => {
+                let url = '';
+                if (hLat && hLng) {
+                    if (uLat && uLng) {
+                        url = `https://www.google.com/maps/dir/?api=1&origin=${uLat},${uLng}&destination=${hLat},${hLng}`;
+                    } else {
+                        url = `https://www.google.com/maps/dir/?api=1&destination=${hLat},${hLng}`;
+                    }
+                } else {
+                    const query = encodeURIComponent(`${hotel.name}, ${hotel.address || ''}, Perú`);
+                    url = `https://www.google.com/maps/search/?api=1&query=${query}`;
+                }
+                window.open(url, '_blank');
+            };
+
+            if (userLocation) {
+                launchRoute(userLocation.lat, userLocation.lng);
+            } else if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        launchRoute(userLocation.lat, userLocation.lng);
+                    },
+                    () => {
+                        launchRoute(null, null);
+                    },
+                    { enableHighAccuracy: true, timeout: 5000 }
+                );
+            } else {
+                launchRoute(null, null);
+            }
+        }
+
+        // ===================================
+        // MODAL DE VISTA PREVIA DE FOTOS & GALERÍA
+        // ===================================
+        let currentGalleryHotel = null;
+        let currentGalleryPhotos = [];
+        let currentGalleryIdx = 0;
+
+        async function openHotelGalleryModal(hotelId) {
+            const hotel = allHotelsCache.find(h => h.id === hotelId);
+            if (!hotel) return;
+
+            currentGalleryHotel = hotel;
+            currentGalleryIdx = 0;
+
+            const settings = hotel.settings || {};
+
+            // 1. Obtener fotos de habitaciones desde Supabase si existen
+            let roomPhotos = [];
+            try {
+                const { data: rooms } = await supabaseClient
+                    .from('rooms')
+                    .select('room_number, base_price, images, features')
+                    .eq('hotel_id', hotelId);
+
+                if (rooms && rooms.length > 0) {
+                    rooms.forEach(r => {
+                        if (r.images) {
+                            const list = r.images.split(',').map(s => s.trim()).filter(Boolean);
+                            list.forEach(img => {
+                                roomPhotos.push({
+                                    url: img,
+                                    caption: `Habitación ${r.room_number} - Tarifa S/ ${parseFloat(r.base_price).toFixed(2)}/noche`
+                                });
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Error fetching room photos:', e);
+            }
+
+            // Fotos curadas de alta calidad por defecto
+            const defaultCuratedPhotos = [
+                {
+                    url: settings.cover_photo || settings.logo || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+                    caption: `Fachada Principal & Entrada - ${hotel.name}`
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80',
+                    caption: `Habitación Matrimonial Confort - ${hotel.name}`
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80',
+                    caption: `Suite Ejecutiva Panorámica - ${hotel.name}`
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1200&q=80',
+                    caption: `Lobby & Recepción 24 Horas - ${hotel.name}`
+                },
+                {
+                    url: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80',
+                    caption: `Habitación Doble Superior - ${hotel.name}`
+                }
+            ];
+
+            currentGalleryPhotos = roomPhotos.length > 0 ? [...roomPhotos, ...defaultCuratedPhotos] : defaultCuratedPhotos;
+
+            // Header info
+            document.getElementById('gallery-hotel-title').textContent = hotel.name;
+            document.getElementById('gallery-hotel-location').innerHTML = `
+                <i class="fa-solid fa-location-dot" style="color:var(--primary);"></i> ${escapeHTML(hotel.address || 'Ubicación céntrica')}
+                &bull; <span style="color:#fbbf24;"><i class="fa-solid fa-star"></i> 4.8</span> Hotel Oficial Verificado
+            `;
+
+            // Botones de acción
+            const waPhone = (settings.whatsapp || settings.phone || hotel.phone || '').replace(/\D/g, '');
+            const waUrl = waPhone ? `https://wa.me/51${waPhone.replace(/^51/, '')}?text=${encodeURIComponent('Hola ' + hotel.name + ', vi sus fotos en TuHotel.pe y deseo consultar disponibilidad y reservar.')}` : '';
+            
+            const btnWa = document.getElementById('gallery-btn-wa');
+            if (btnWa) {
+                if (waUrl) {
+                    btnWa.href = waUrl;
+                    btnWa.style.display = 'inline-flex';
+                } else {
+                    btnWa.style.display = 'none';
+                }
+            }
+
+            const btnReg = document.getElementById('gallery-btn-register');
+            if (btnReg) {
+                btnReg.href = `register-guest.html?hotel_id=${hotel.id}`;
+            }
+
+            const btnMaps = document.getElementById('gallery-btn-maps');
+            if (btnMaps) {
+                btnMaps.onclick = () => openGoogleMapsRoute(hotel.id);
+            }
+
+            // Renderizar miniaturas
+            const thumbStrip = document.getElementById('gallery-thumbs-container');
+            thumbStrip.innerHTML = currentGalleryPhotos.map((p, i) => `
+                <img src="${p.url}" class="gallery-thumb-item ${i === 0 ? 'active' : ''}" onclick="setGalleryPhoto(${i})" alt="Miniatura ${i+1}">
+            `).join('');
+
+            updateGalleryView();
+            document.getElementById('hotel-gallery-modal').classList.add('active');
+        }
+
+        function setGalleryPhoto(index) {
+            if (index < 0) index = currentGalleryPhotos.length - 1;
+            if (index >= currentGalleryPhotos.length) index = 0;
+            currentGalleryIdx = index;
+            updateGalleryView();
+        }
+
+        function nextGalleryPhoto() {
+            setGalleryPhoto(currentGalleryIdx + 1);
+        }
+
+        function prevGalleryPhoto() {
+            setGalleryPhoto(currentGalleryIdx - 1);
+        }
+
+        function updateGalleryView() {
+            if (!currentGalleryPhotos || currentGalleryPhotos.length === 0) return;
+            const photo = currentGalleryPhotos[currentGalleryIdx];
+            const mainImg = document.getElementById('gallery-main-image');
+            mainImg.style.opacity = '0.3';
+            setTimeout(() => {
+                mainImg.src = photo.url;
+                mainImg.style.opacity = '1';
+            }, 100);
+
+            document.getElementById('gallery-counter-tag').textContent = `Foto ${currentGalleryIdx + 1} de ${currentGalleryPhotos.length}`;
+            document.getElementById('gallery-caption-tag').textContent = photo.caption || currentGalleryHotel?.name || 'Hotel';
+
+            // Actualizar miniatura activa
+            document.querySelectorAll('.gallery-thumb-item').forEach((t, i) => {
+                if (i === currentGalleryIdx) {
+                    t.classList.add('active');
+                    t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                } else {
+                    t.classList.remove('active');
+                }
+            });
+        }
+
+        function closeHotelGalleryModal() {
+            const modal = document.getElementById('hotel-gallery-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function toggleHotelOptions(event, btn) {
+            event.stopPropagation();
+            const wrapper = btn.closest('.hotel-actions-menu-wrapper');
+            if (!wrapper) return;
+            const isOpened = wrapper.classList.contains('active');
+            document.querySelectorAll('.hotel-actions-menu-wrapper.active').forEach(w => w.classList.remove('active'));
+            if (!isOpened) {
+                wrapper.classList.add('active');
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.hotel-actions-menu-wrapper')) {
+                document.querySelectorAll('.hotel-actions-menu-wrapper.active').forEach(w => w.classList.remove('active'));
+            }
+        });
+
+        // AUTOCOMPLETADO EN VIVO
+        function handleSearchInput(val) {
+            const query = (val || '').trim().toLowerCase();
+            const box = document.getElementById('search-autocomplete-box');
+
+            if (!query || query.length < 1) {
+                closeAutocomplete();
+                applySidebarFilters();
+                return;
+            }
+
+            const matchedHotels = allHotelsCache.filter(h => (h.name || '').toLowerCase().includes(query));
+            const matchedCities = [...new Set(allHotelsCache.map(h => h.city || (h.address ? h.address.split(',').pop().trim() : '')))]
+                .filter(c => c && c.toLowerCase().includes(query));
+
+            if (matchedHotels.length === 0 && matchedCities.length === 0) {
+                closeAutocomplete();
+                applySidebarFilters();
+                return;
+            }
+
+            let html = '';
+
+            matchedCities.forEach(city => {
+                html += `
+                    <div class="autocomplete-item" onclick="selectCity('${city}')">
+                        <i class="fa-solid fa-city" style="color:var(--primary);"></i>
+                        <div>
+                            <div class="autocomplete-item-title">${city}</div>
+                            <div class="autocomplete-item-sub">Ciudad / Destino</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            matchedHotels.forEach(h => {
+                html += `
+                    <div class="autocomplete-item" onclick="selectHotel('${h.name}')">
+                        <i class="fa-solid fa-hotel" style="color:var(--primary);"></i>
+                        <div>
+                            <div class="autocomplete-item-title">${h.name}</div>
+                            <div class="autocomplete-item-sub">${h.address || 'Hotel verificado'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            box.innerHTML = html;
+            box.classList.add('active');
+
+            applySidebarFilters();
+        }
+
+        function selectHotel(name) {
+            document.getElementById('search-query').value = name;
+            closeAutocomplete();
+            applySidebarFilters();
+        }
+
+        function selectCity(city) {
+            document.getElementById('search-query').value = city;
+            closeAutocomplete();
+            applySidebarFilters();
+        }
+
+        function quickSearchCity(city) {
+            activeSidebarCity = city;
+            const input = document.getElementById('search-query');
+            if (input) input.value = '';
+            
+            // Sync sidebar city pills
+            document.querySelectorAll('.filter-city-pill').forEach(b => {
+                if ((!city && b.textContent.includes('Todos')) || (city && b.textContent.includes(city))) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+
+            closeAutocomplete();
+            applySidebarFilters();
+            const dir = document.getElementById('directorio');
+            if (dir) dir.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeAutocomplete() {
+            const box = document.getElementById('search-autocomplete-box');
+            if (box) box.classList.remove('active');
+        }
+
+        function filterHotelsDirectory() {
+            applySidebarFilters();
+            const dir = document.getElementById('directorio');
+            if (dir) dir.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // GPS
+        function detectUserLocationAndSort() {
+            if (!navigator.geolocation) {
+                alert('Geolocalización no soportada.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+                    allHotelsCache.sort((a, b) => {
+                        const locA = a.settings?.location;
+                        const locB = b.settings?.location;
+                        const distA = locA?.lat ? calculateGeoDistance(userLocation.lat, userLocation.lng, locA.lat, locA.lng) : 9999;
+                        const distB = locB?.lat ? calculateGeoDistance(userLocation.lat, userLocation.lng, locB.lat, locB.lng) : 9999;
+                        return distA - distB;
+                    });
+
+                    renderHotelsList(allHotelsCache);
+                    openMapModal();
+                },
+                (err) => {
+                    alert('No se pudo acceder a tu GPS.');
+                    openMapModal();
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        // MAPA SATELITAL / OPENSTREETMAP
+        function openMapModal() {
+            document.getElementById('map-modal').classList.add('active');
+            setTimeout(initLeafletMap, 200);
+        }
+
+        function closeMapModal() {
+            document.getElementById('map-modal').classList.remove('active');
+        }
+
+        function initLeafletMap() {
+            const defaultLat = userLocation ? userLocation.lat : -18.0065;
+            const defaultLng = userLocation ? userLocation.lng : -70.2462;
+
+            if (!leafletMapInstance) {
+                leafletMapInstance = L.map('hotel-leaflet-map').setView([defaultLat, defaultLng], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(leafletMapInstance);
+            } else {
+                leafletMapInstance.invalidateSize();
+                leafletMapInstance.setView([defaultLat, defaultLng], userLocation ? 15 : 14);
+            }
+
+            mapMarkers.forEach(m => leafletMapInstance.removeLayer(m));
+            mapMarkers = [];
+            if (userGpsMarker) leafletMapInstance.removeLayer(userGpsMarker);
+
+            if (userLocation) {
+                const userIcon = L.divIcon({
+                    html: '<div class="gps-radar-dot"></div>',
+                    iconSize: [22, 22]
+                });
+                userGpsMarker = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+                    .addTo(leafletMapInstance)
+                    .bindPopup('<strong style="color:#6366f1;">📍 Tu Ubicación Actual</strong>');
+                userGpsMarker.openPopup();
+            }
+
+            allHotelsCache.forEach((h, idx) => {
+                const loc = h.settings?.location;
+                const hLat = loc?.lat || (defaultLat + (idx * 0.004) - 0.002);
+                const hLng = loc?.lng || (defaultLng + (idx * 0.005) - 0.003);
+
+                let distText = '';
+                if (userLocation) {
+                    const distKm = calculateGeoDistance(userLocation.lat, userLocation.lng, hLat, hLng);
+                    if (distKm !== null) {
+                        distText = `<div style="background:#f5f3ff; color:#6366f1; padding:3px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; margin:4px 0 8px;"><i class="fa-solid fa-location-arrow"></i> A ${distKm} km de ti</div>`;
+                    }
+                }
+
+                const gmapsRouteUrl = userLocation 
+                    ? `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${hLat},${hLng}`
+                    : `https://www.google.com/maps/dir/?api=1&destination=${hLat},${hLng}`;
+
+                const m = L.marker([hLat, hLng])
+                    .addTo(leafletMapInstance)
+                    .bindPopup(`
+                        <div style="font-family:'Plus Jakarta Sans',sans-serif; min-width:180px;">
+                            <strong style="font-size:0.95rem; color:#0f172a;">${h.name}</strong><br>
+                            <div style="font-weight:900; color:#0284c7; font-size:0.95rem; margin-bottom:6px;">
+                                ${h.min_price ? `S/ ${parseFloat(h.min_price).toFixed(2)} <small style="font-weight:normal; color:#64748b; font-size:0.7rem;">/noche</small>` : (h.settings?.starting_price ? `S/ ${parseFloat(h.settings.starting_price).toFixed(2)} <small style="font-weight:normal; color:#64748b; font-size:0.7rem;">/noche</small>` : `<span style="font-size:0.8rem; color:#10b981; font-weight:800;">Tarifa Directa 0% Comisión</span>`)}
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <a href="guest.html?hotel_id=${h.id}" style="flex:1; background:#0284c7; color:#fff; padding:5px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:700; text-align:center;">Ver Hotel</a>
+                                <a href="${gmapsRouteUrl}" target="_blank" style="background:#2563eb; color:#fff; padding:5px 8px; border-radius:4px; text-decoration:none; font-size:0.75rem; font-weight:700;" title="Abrir ruta en Google Maps">📍 Ruta</a>
+                            </div>
+                        </div>
+                    `);
+                mapMarkers.push(m);
+            });
+        }
+
+        // CARGA DINÁMICA DE TESTIMONIOS Y RESEÑAS REALES DIRECTO DESDE SUPABASE DB
+        async function loadDynamicTestimonials() {
+            const container = document.getElementById('testimonials-cards-container');
+            const section = document.getElementById('testimonios');
+            if (!container) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hotel_reviews')
+                    .select('*, hotels(name, address, settings)')
+                    .neq('status', 'oculta')
+                    .order('is_featured', { ascending: false })
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    if (section) section.style.display = 'none';
+                    return;
+                }
+
+                if (section) section.style.display = 'block';
+
+                container.innerHTML = data.map(r => {
+                    const guestName = r.guest_name || 'Huésped Verificado';
+                    const hotelName = (r.hotels && r.hotels.name) || 'Hotel Afiliado';
+                    const city = (r.hotels && r.hotels.settings?.location?.city) || 'Perú';
+                    const starsHtml = Array.from({ length: r.rating || 5 }, () => '<i class="fa-solid fa-star"></i>').join('');
+                    
+                    return `
+                        <div class="testimonial-card-clean">
+                            <div>
+                                <div class="test-author-info">
+                                    <div class="test-avatar-emblem"><i class="fa-solid fa-user-check"></i></div>
+                                    <div>
+                                        <div class="test-author-name">${escapeHTML(guestName)}</div>
+                                        <div class="test-author-role">${escapeHTML(hotelName)} &bull; ${escapeHTML(city)}</div>
+                                    </div>
+                                </div>
+                                <p class="test-quote-text">"${escapeHTML(r.comment || '')}"</p>
+                            </div>
+                            <div class="test-stars-row">
+                                <div style="display:flex; gap:3px;">${starsHtml}</div>
+                                <span style="font-size:0.72rem; font-weight:700; color:#059669; background:#ecfdf5; border:1px solid #a7f3d0; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">
+                                    <i class="fa-solid fa-circle-check"></i> Verificado
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.warn('Error cargando testimonios de BD:', e);
+                if (section) section.style.display = 'none';
+            }
+        }
+
+        // ===================================
+        // CARGA DINÁMICA DE PREGUNTAS FRECUENTES (FAQ)
+        // ===================================
+        async function loadDynamicFAQs() {
+            const container = document.getElementById('faq-accordion-container');
+            if (!container) return;
+
+            let faqs = [];
+            try {
+                const { data, error } = await supabaseClient
+                    .from('saas_settings')
+                    .select('settings')
+                    .eq('id', '00000000-0000-0000-0000-000000000000')
+                    .single();
+
+                if (!error && data?.settings?.faqs && data.settings.faqs.length > 0) {
+                    faqs = data.settings.faqs;
+                }
+            } catch (e) {
+                console.warn('Error cargando FAQs de BD:', e);
+            }
+
+            if (!faqs || faqs.length === 0) {
+                faqs = [
+                    {
+                        question: '¿Cómo funciona la reserva directa en TuHotel.pe?',
+                        answer: 'Eliges el hotel de tu preferencia en el directorio, revisas fotos y tarifas oficiales en tiempo real, y con un solo clic en "Registrarse / Reservar" o "WhatsApp" contactas directo con el personal del hotel para confirmar tu estadía sin intermediarios.'
+                    },
+                    {
+                        question: '¿TuHotel.pe cobra comisiones adicionales a los huéspedes?',
+                        answer: 'No. El servicio de búsqueda, geolocalización y contacto directo es 100% gratuito para todos los huéspedes y turistas. Pagas la tarifa oficial y justa directamente al hotel.'
+                    },
+                    {
+                        question: '¿Cómo llego a mi hotel usando el mapa GPS?',
+                        answer: 'Cada hospedaje cuenta con coordenadas satelitales exactas. Al pulsar el botón "Ruta en Google Maps", se abrirá Google Maps en tu teléfono con la mejor ruta guiada paso a paso desde tu ubicación actual.'
+                    },
+                    {
+                        question: '¿Qué servicios tengo disponibles al llegar a mi habitación?',
+                        answer: 'En tu cuarto encontrarás un código QR oficial del hotel. Al escanearlo con la cámara de tu smartphone tendrás acceso a la clave Wi-Fi, carta de minibar y pedidos de room service directo a recepción.'
+                    },
+                    {
+                        question: '¿Cómo afilio mi hotel a la plataforma?',
+                        answer: 'Solo debes ingresar a "Afiliar mi Hotel", registrar los datos de tu establecimiento y elegir tu plan. En minutos tendrás acceso a tu panel de control PMS en la nube para gestionar habitaciones y reservas.'
+                    }
+                ];
+            }
+
+            container.innerHTML = faqs.map((f, i) => `
+                <div class="faq-accordion-item ${i === 0 ? 'active' : ''}" onclick="toggleFaqAccordion(this)">
+                    <div class="faq-q-title">
+                        <span>${escapeHTML(f.question)}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-a-desc">${escapeHTML(f.answer)}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleFaqAccordion(elem) {
+            const item = elem.closest('.faq-accordion-item');
+            if (!item) return;
+            const wasActive = item.classList.contains('active');
+            document.querySelectorAll('.faq-accordion-item').forEach(i => i.classList.remove('active'));
+            if (!wasActive) item.classList.add('active');
+        }
+    </script>
+</body>
+</html>

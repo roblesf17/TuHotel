@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afiliar mi Hotel - TuHotel.pe Software PMS & Red Hotelera</title>
+    <meta name="description" content="Digitaliza tu hotel con el software PMS líder en Perú. Rack de habitaciones en vivo, control de caja, 0% comisiones y 30 días de prueba gratis.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Shared App Core -->
+    <script src="js/app.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #eef2ff;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #d946ef 100%);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --radius-pill: 9999px;
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a, button, select, [onclick], .btn, .btn-primary-pill, .btn-guest-pill, .feature-box-minimal, .stat-item-unit, .pricing-card-unit {
+            cursor: pointer !important;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--slate-800);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 1. NAVBAR FLOTANTE */
+        .site-nav-container {
+            position: fixed;
+            top: 1.25rem;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            max-width: 1400px;
+            width: calc(100% - 2.5rem);
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .site-nav-glass {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: var(--radius-pill);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand-logo-unit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--slate-900);
+            transition: var(--transition);
+        }
+
+        .brand-logo-unit:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-icon-sq {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+        }
+
+        .brand-name-h3 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-name-h3 span {
+            color: var(--primary);
+        }
+
+        .nav-links-menu {
+            display: flex;
+            align-items: center;
+            gap: 2.25rem;
+        }
+
+        .nav-item-link {
+            text-decoration: none;
+            color: var(--slate-600);
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-item-link:hover {
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .nav-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-guest-pill {
+            background: var(--slate-50);
+            color: var(--slate-700);
+            padding: 0.6rem 1.25rem;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: var(--transition);
+            border: 1px solid var(--slate-200);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-guest-pill:hover {
+            background: #ffffff;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary-pill {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            padding: 0.65rem 1.4rem;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 800;
+            transition: var(--transition);
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(79, 70, 229, 0.4);
+        }
+
+        /* 2. HERO SPLIT B2B */
+        .hero-split-section {
+            padding: 9.5rem 1.5rem 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-split-inner {
+            display: grid;
+            grid-template-columns: 1.15fr 0.95fr;
+            gap: 4.5rem;
+            align-items: center;
+        }
+
+        .section-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f5f3ff;
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            margin-bottom: 1.25rem;
+            border: 1.5px solid #ddd6fe;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+            transition: var(--transition);
+        }
+
+        .section-pill-tag:hover {
+            transform: translateY(-1px);
+        }
+
+        .hero-title-lead {
+            font-size: 3.2rem;
+            font-weight: 900;
+            line-height: 1.12;
+            letter-spacing: -1.2px;
+            color: var(--slate-900);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-title-lead span {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle-p {
+            font-size: 1.1rem;
+            color: var(--slate-600);
+            line-height: 1.65;
+            margin-bottom: 2.25rem;
+            max-width: 560px;
+        }
+
+        .hero-tech-badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .tech-micro-badge {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            padding: 6px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--slate-700);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            transition: var(--transition);
+        }
+
+        .tech-micro-badge:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tech-micro-badge i {
+            color: var(--primary);
+        }
+
+        .hero-cta-buttons-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* MOCKUP ELEVADO */
+        .hero-mockup-wrapper {
+            position: relative;
+        }
+
+        .hero-mockup-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .hero-mockup-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 70px rgba(79, 70, 229, 0.15);
+        }
+
+        .mockup-header-bar {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--slate-200);
+            padding: 0.85rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mockup-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mockup-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .mockup-body-preview {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 1.25rem;
+            font-size: 0.8rem;
+        }
+
+        .mockup-sidebar-preview {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 0.85rem 0.6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            color: var(--slate-600);
+            font-size: 0.75rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        .mockup-main-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mockup-room-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .mockup-room-box {
+            background: #f0fdf4;
+            border: 1.5px solid #bbf7d0;
+            color: #166534;
+            padding: 0.75rem 0.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .mockup-room-box.occupied {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .mockup-room-box.cleaning {
+            background: #fefce8;
+            border-color: #fef08a;
+            color: #854d0e;
+        }
+
+        /* 3. MÓDULOS DEL PMS */
+        .features-section-minimal {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-h2-title {
+            font-size: 2.35rem;
+            font-weight: 900;
+            color: var(--slate-900);
+            letter-spacing: -0.6px;
+            margin-bottom: 0.6rem;
+            line-height: 1.2;
+        }
+
+        .section-desc-sub {
+            font-size: 1rem;
+            color: var(--slate-600);
+            max-width: 620px;
+            margin: 0 auto 3.5rem;
+            line-height: 1.6;
+        }
+
+        .features-4col-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.75rem;
+            text-align: left;
+        }
+
+        .feature-box-minimal {
+            background: #ffffff;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 22px;
+            padding: 2.25rem 1.75rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .feature-box-minimal:hover {
+            transform: translateY(-8px);
+            border-color: #c7d2fe;
+            box-shadow: 0 20px 45px rgba(79, 70, 229, 0.1);
+        }
+
+        .feature-icon-emblem {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .feature-box-minimal:hover .feature-icon-emblem {
+            transform: scale(1.08) rotate(3deg);
+        }
+
+        .feature-box-minimal h4 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--slate-900);
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-box-minimal p {
+            font-size: 0.88rem;
+            color: var(--slate-600);
+            line-height: 1.55;
+        }
+
+        /* 4. STATS */
+        .stats-banner-container {
+            max-width: 1200px;
+            margin: 0 auto 5rem;
+            padding: 0 1.5rem;
+        }
+
+        .stats-4grid-box {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-xl);
+            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .stat-item-unit {
+            text-align: center;
+            border-right: 1px solid var(--slate-100);
+            padding: 0 1rem;
+        }
+
+        .stat-item-unit:last-child {
+            border-right: none;
+        }
+
+        .stat-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin: 0 auto 0.75rem;
+        }
+
+        .stat-number-h3 {
+            font-size: 1.85rem;
+            font-weight: 900;
+            color: var(--slate-900);
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-label-p {
+            font-size: 0.78rem;
+            color: var(--slate-500);
+            font-weight: 600;
+        }
+
+        /* 5. FORMULARIO AFILIACIÓN */
+        .contact-section-split {
+            max-width: 1200px;
+            margin: 5rem auto 6rem;
+            padding: 0 1.5rem;
+        }
+
+        .contact-split-card {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-xl);
+            padding: 3.5rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1.35fr;
+            gap: 3.5rem;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .contact-left-photo-box {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .contact-support-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            margin: 1rem 0;
+            border: 1px solid var(--slate-200);
+        }
+
+        .contact-badge-info-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-mini-badge {
+            background: var(--slate-50);
+            border: 1px solid var(--slate-200);
+            border-radius: var(--radius-pill);
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--slate-700);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-2col-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .field-clean-group {
+            margin-bottom: 1.15rem;
+        }
+
+        .field-clean-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--slate-700);
+            margin-bottom: 0.4rem;
+        }
+
+        .field-clean-group input,
+        .field-clean-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--slate-200);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--slate-900);
+            transition: var(--transition);
+            background: #ffffff;
+            outline: none;
+        }
+
+        .field-clean-group input:focus,
+        .field-clean-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-submit-affiliate-direct {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border: none;
+            padding: 0.95rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit-affiliate-direct:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+        }
+
+        /* FOOTER */
+        .site-dark-footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 4rem 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-inner-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            gap: 3rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-brand-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-brand-title span {
+            color: #38bdf8;
+        }
+
+        .footer-col-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-links-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .footer-links-list a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .footer-links-list a:hover {
+            color: #ffffff;
+            padding-left: 4px;
+        }
+
+        .footer-bottom-bar {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 992px) {
+            .hero-split-inner { grid-template-columns: 1fr; }
+            .features-4col-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-4grid-box { grid-template-columns: repeat(2, 1fr); }
+            .contact-split-card { grid-template-columns: 1fr; }
+            .footer-inner-grid { grid-template-columns: 1fr 1fr; }
+            .nav-links-menu { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .hero-title-lead { font-size: 2.2rem; }
+            .features-4col-grid { grid-template-columns: 1fr; }
+            .stats-4grid-box { grid-template-columns: 1fr; }
+            .form-2col-grid { grid-template-columns: 1fr; }
+            .footer-inner-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVBAR FLOTANTE -->
+    <header class="site-nav-container">
+        <div class="site-nav-glass">
+            <a href="index.html" class="brand-logo-unit">
+                <div class="brand-icon-sq">
+                    <i class="fa-solid fa-hotel"></i>
+                </div>
+                <div class="brand-name-h3" id="site-brand-title">TuHotel<span>.pe PMS</span></div>
+            </a>
+
+            <nav class="nav-links-menu">
+                <a href="#inicio" class="nav-item-link">Software</a>
+                <a href="#modulos" class="nav-item-link">Módulos</a>
+                <a href="#precios" class="nav-item-link">Planes & Precios</a>
+                <a href="#afiliacion" class="nav-item-link" style="color:var(--primary); font-weight:800;">Afiliar mi Hotel</a>
+            </nav>
+
+            <div class="nav-actions-right">
+                <a href="index.html" class="btn-guest-pill" title="Volver al buscador para turistas">
+                    <i class="fa-solid fa-magnifying-glass"></i> Buscar Hoteles
+                </a>
+                <a href="login.html" class="btn-primary-pill">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO SPLIT SAAS -->
+    <section class="hero-split-section" id="inicio">
+        <div class="hero-split-inner">
+            <div>
+                <div class="section-pill-tag">
+                    <i class="fa-solid fa-bolt"></i> PMS en la Nube &bull; 0% Comisiones
+                </div>
+                <h1 class="hero-title-lead">
+                    Todo lo que tu hotel necesita para <span>crecer y vender</span>, en un solo lugar
+                </h1>
+                <p class="hero-subtitle-p">
+                    Software de gestión de recepción (PMS) en la nube, rack de habitaciones en tiempo real, portal para huéspedes con WiFi QR y directorio con mapa satelital GPS.
+                </p>
+
+                <div class="hero-tech-badges-row">
+                    <div class="tech-micro-badge"><i class="fa-solid fa-bed"></i> Rack Visual</div>
+                    <div class="tech-micro-badge"><i class="fa-solid fa-qrcode"></i> WiFi QR Huésped</div>
+                    <div class="tech-micro-badge"><i class="fa-solid fa-cash-register"></i> Caja & Turnos</div>
+                    <div class="tech-micro-badge"><i class="fa-solid fa-location-dot"></i> GPS Maps</div>
+                    <div class="tech-micro-badge"><i class="fa-brands fa-whatsapp"></i> WhatsApp Directo</div>
+                </div>
+
+                <div class="hero-cta-buttons-row">
+                    <a href="#afiliacion" class="btn-primary-pill" style="padding:0.85rem 1.8rem; font-size:1rem;">
+                        <i class="fa-solid fa-rocket"></i> Afiliar mi Hotel (30 Días Gratis)
+                    </a>
+                    <a href="#precios" class="btn-guest-pill" style="padding:0.85rem 1.4rem; font-size:0.95rem; background:#ffffff;">
+                        Ver Planes & Precios
+                    </a>
+                </div>
+            </div>
+
+            <!-- PREVIEW MOCKUP ELEVADO -->
+            <div class="hero-mockup-wrapper">
+                <div class="hero-mockup-card">
+                    <div class="mockup-header-bar">
+                        <div class="mockup-dots">
+                            <div class="mockup-dot" style="background:#ef4444;"></div>
+                            <div class="mockup-dot" style="background:#f59e0b;"></div>
+                            <div class="mockup-dot" style="background:#10b981;"></div>
+                        </div>
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--slate-500);">TuHotel PMS v2.0 - Rack en Vivo</span>
+                        <span style="font-size:0.75rem; background:#ecfdf5; color:#065f46; padding:2px 8px; border-radius:4px; font-weight:800;">● Online</span>
+                    </div>
+
+                    <div class="mockup-body-preview">
+                        <div class="mockup-sidebar-preview">
+                            <div style="font-weight:800; color:var(--primary);"><i class="fa-solid fa-grid-2"></i> Dashboard</div>
+                            <div><i class="fa-solid fa-bed"></i> Habitaciones</div>
+                            <div><i class="fa-solid fa-calendar-check"></i> Reservas</div>
+                            <div><i class="fa-solid fa-cash-register"></i> Caja Turno</div>
+                            <div><i class="fa-solid fa-qrcode"></i> Portal Huésped</div>
+                        </div>
+
+                        <div class="mockup-main-preview">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:0.8rem; font-weight:800; color:var(--slate-800);">Estado de Habitaciones</span>
+                                <span style="font-size:0.7rem; color:var(--slate-500);">Ocupación: <strong>85%</strong></span>
+                            </div>
+
+                            <div class="mockup-room-grid">
+                                <div class="mockup-room-box occupied"><strong>Hab 101</strong><br><small>Ocupada</small></div>
+                                <div class="mockup-room-box"><strong>Hab 102</strong><br><small>Disponible</small></div>
+                                <div class="mockup-room-box cleaning"><strong>Hab 103</strong><br><small>Limpieza</small></div>
+                                <div class="mockup-room-box occupied"><strong>Hab 201</strong><br><small>Ocupada</small></div>
+                                <div class="mockup-room-box occupied"><strong>Hab 202</strong><br><small>Ocupada</small></div>
+                                <div class="mockup-room-box"><strong>Hab 203</strong><br><small>Disponible</small></div>
+                            </div>
+
+                            <div style="background:#f8fafc; border:1px solid var(--slate-200); border-radius:8px; padding:0.6rem; font-size:0.72rem; color:var(--slate-600); display:flex; justify-content:space-between;">
+                                <span><i class="fa-solid fa-receipt"></i> Turno Actual: S/ 1,420.00</span>
+                                <span style="color:#059669; font-weight:800;">Cuadre Exacto ✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. MÓDULOS / SERVICIOS (4 COLUMNAS) -->
+    <section class="features-section-minimal" id="modulos" style="padding:6rem 1.5rem;">
+        <div class="section-pill-tag">Módulos del Sistema</div>
+        <h2 class="section-h2-title">Todas las herramientas que necesitas para tu hotel</h2>
+        <p class="section-desc-sub">Diseñado para simplificar la operación diaria de recepcionistas y dueños de hotel.</p>
+
+        <div class="features-4col-grid">
+            <div class="feature-box-minimal">
+                <div class="feature-icon-emblem" style="background:linear-gradient(135deg, #eff6ff, #dbeafe); color:#2563eb; border:1px solid #bfdbfe;">
+                    <i class="fa-solid fa-bed"></i>
+                </div>
+                <h4>Rack de Habitaciones</h4>
+                <p>Check-in, check-out, estado de limpieza y asignación visual de cuartos con 1 solo clic en tiempo real.</p>
+            </div>
+
+            <div class="feature-box-minimal">
+                <div class="feature-icon-emblem" style="background:linear-gradient(135deg, #faf5ff, #f3e8ff); color:#7c3aed; border:1px solid #e9d5ff;">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <h4>Portal Huésped & WiFi</h4>
+                <p>Clave WiFi instantánea, carta digital de minibar y pedidos de room service directo al WhatsApp de recepción.</p>
+            </div>
+
+            <div class="feature-box-minimal">
+                <div class="feature-icon-emblem" style="background:linear-gradient(135deg, #ecfdf5, #d1fae5); color:#059669; border:1px solid #a7f3d0;">
+                    <i class="fa-solid fa-cash-register"></i>
+                </div>
+                <h4>Caja & Turnos</h4>
+                <p>Arqueos exactos por recepcionista, cobros con Yape/Plin, efectivo y tarjetas con reportes sin descuadres.</p>
+            </div>
+
+            <div class="feature-box-minimal">
+                <div class="feature-icon-emblem" style="background:linear-gradient(135deg, #fff7ed, #ffedd5); color:#ea580c; border:1px solid #fed7aa;">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h4>Directorio GPS</h4>
+                <p>Presencia oficial en el directorio nacional con mapa satelital y botón de ruta guiada en Google Maps.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. STATS 4-GRID BAR -->
+    <div class="stats-banner-container">
+        <div class="stats-4grid-box">
+            <div class="stat-item-unit">
+                <div class="stat-icon-wrap" style="background:#eff6ff; color:#2563eb;"><i class="fa-solid fa-cloud"></i></div>
+                <div class="stat-number-h3">100%</div>
+                <div class="stat-label-p">En la Nube & Móvil</div>
+            </div>
+
+            <div class="stat-item-unit">
+                <div class="stat-icon-wrap" style="background:#ecfdf5; color:#059669;"><i class="fa-solid fa-percent"></i></div>
+                <div class="stat-number-h3">0%</div>
+                <div class="stat-label-p">Comisión de Intermediarios</div>
+            </div>
+
+            <div class="stat-item-unit">
+                <div class="stat-icon-wrap" style="background:#faf5ff; color:#7c3aed;"><i class="fa-solid fa-star"></i></div>
+                <div class="stat-number-h3">4.9 / 5</div>
+                <div class="stat-label-p">Satisfacción de Hoteles</div>
+            </div>
+
+            <div class="stat-item-unit">
+                <div class="stat-icon-wrap" style="background:#fff7ed; color:#ea580c;"><i class="fa-solid fa-headset"></i></div>
+                <div class="stat-number-h3">24 / 7</div>
+                <div class="stat-label-p">Soporte Continuo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. PLANES Y MEMBRESÍAS SAAS (DINÁMICOS) -->
+    <section class="features-section-minimal" id="precios" style="background:#f8fafc; border-top:1px solid var(--slate-200); border-bottom:1px solid var(--slate-200); padding:5rem 1.5rem;">
+        <div style="max-width:1200px; margin:0 auto; text-align:center;">
+            <div class="section-pill-tag">Planes & Membresías</div>
+            <h2 class="section-h2-title">Planes Transparentes para Hoteles de Todo Tamaño</h2>
+            <p class="section-desc-sub">Empieza gratis o elige el plan ideal para automatizar tu recepción sin comisiones ocultas.</p>
+
+            <div id="landing-plans-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; margin-top:2.5rem; text-align:left;">
+                <!-- Dinámico desde JS -->
+            </div>
+
+            <!-- BANNER DE GARANTÍA TRANSPARENTE DE PRUEBA -->
+            <div style="margin-top:2.5rem; background:linear-gradient(135deg, #eff6ff, #f0fdf4); border:1.5px solid #bfdbfe; border-radius:16px; padding:1.25rem 1.75rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.25rem; text-align:left; box-shadow:0 4px 16px rgba(37,99,235,0.06);">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <div style="width:46px; height:46px; border-radius:14px; background:#dbeafe; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <strong style="color:#1e40af; font-size:0.98rem; display:block;">Prueba el Plan Estándar por 30 Días sin Compromiso</strong>
+                        <p style="margin:2px 0 0; font-size:0.84rem; color:#475569; line-height:1.45;">
+                            Todo nuevo registro disfruta de 30 días de acceso completo. Al finalizar el mes, tu cuenta pasa automáticamente al <strong>Plan Gratuito</strong> sin cobros sorpresa y con sus límites adaptados.
+                        </p>
+                    </div>
+                </div>
+                <a href="#afiliacion" class="btn-primary-pill" style="padding:0.65rem 1.4rem; font-size:0.88rem; font-weight:700; white-space:nowrap; background:linear-gradient(135deg, var(--primary), #6366f1); color:white; text-decoration:none; border-radius:999px; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-hotel"></i> Afiliar mi Hotel
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. CONTACTO & AFILIACIÓN DIRECTA -->
+    <section class="contact-section-split" id="afiliacion">
+        <div class="contact-split-card">
+            <div class="contact-left-photo-box">
+                <div>
+                    <div class="section-pill-tag">Afiliación Oficial</div>
+                    <h3 style="font-size:1.85rem; font-weight:900; color:var(--slate-900); margin-bottom:0.75rem; line-height:1.2;">
+                        Registra tu Hotel
+                    </h3>
+                    <p style="font-size:0.9rem; color:var(--slate-500); line-height:1.6; margin-bottom:1.25rem;">
+                        Súmate a la red hotelera de TuHotel.pe y obtén tu sistema PMS con soporte continuo.
+                    </p>
+                </div>
+
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80" alt="Soporte Hotelero" class="contact-support-img">
+
+                <div class="contact-badge-info-row">
+                    <div class="contact-mini-badge">
+                        <i class="fa-solid fa-envelope" style="color:var(--primary);"></i>
+                        <span id="saas-contact-email">soporte@tuhotel.pe</span>
+                    </div>
+                    <div class="contact-mini-badge">
+                        <i class="fa-brands fa-whatsapp" style="color:#25d366;"></i>
+                        <span id="saas-contact-phone">+51 930 372 814</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DIRECTO -->
+            <div>
+                <h4 style="font-size:1.2rem; font-weight:800; margin-bottom:0.5rem;">Enviar Solicitud de Afiliación</h4>
+                <p style="font-size:0.82rem; color:var(--slate-500); margin-bottom:1.5rem;">Ingresa los datos del hotel para recibir tus credenciales de acceso.</p>
+
+                <form id="direct-affiliation-form" onsubmit="handleDirectAffiliation(event)">
+                    <div class="form-2col-grid">
+                        <div class="field-clean-group">
+                            <label for="aff-name">Nombre del Hotel</label>
+                            <input type="text" id="aff-name" required placeholder="Ej. Hotel El Mirador">
+                        </div>
+                        <div class="field-clean-group">
+                            <label for="aff-ruc">RUC</label>
+                            <input type="text" id="aff-ruc" maxlength="11" required placeholder="11 dígitos">
+                        </div>
+                    </div>
+
+                    <div class="form-2col-grid">
+                        <div class="field-clean-group">
+                            <label for="aff-city">Ciudad</label>
+                            <input type="text" id="aff-city" required placeholder="Ej. Tacna, Lima, Cusco">
+                        </div>
+                        <div class="field-clean-group">
+                            <label for="aff-rooms">N° Habitaciones</label>
+                            <input type="number" id="aff-rooms" min="1" required placeholder="Ej. 12">
+                        </div>
+                    </div>
+
+                    <div class="field-clean-group">
+                        <label for="aff-address">Dirección</label>
+                        <input type="text" id="aff-address" required placeholder="Av. Principal 123">
+                    </div>
+
+                    <div class="form-2col-grid">
+                        <div class="field-clean-group">
+                            <label for="aff-owner">Nombre del Dueño / Admin</label>
+                            <input type="text" id="aff-owner" required placeholder="Nombre y Apellidos">
+                        </div>
+                        <div class="field-clean-group">
+                            <label for="aff-phone">WhatsApp de Contacto</label>
+                            <input type="tel" id="aff-phone" required placeholder="Ej. 987654321">
+                        </div>
+                    </div>
+
+                    <div class="field-clean-group">
+                        <label for="aff-email">Correo para recibir credenciales</label>
+                        <input type="email" id="aff-email" required placeholder="admin@tuhotel.com">
+                    </div>
+
+                    <div class="field-clean-group">
+                        <label for="aff-plan">Plan de Membresía Deseado</label>
+                        <select id="aff-plan" required>
+                            <option value="free">🌱 Plan Gratuito (S/ 0 - Hasta 8 habs)</option>
+                            <option value="standard" selected>🚀 Plan Estándar (S/ 59/mes - Hasta 20 habs)</option>
+                            <option value="unlimited">👑 Plan Ilimitado (S/ 119/mes - Ilimitado)</option>
+                        </select>
+                    </div>
+
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.8rem; color:#166534; display:flex; align-items:flex-start; gap:8px;">
+                        <i class="fa-solid fa-circle-check" style="color:#16a34a; font-size:1.05rem; margin-top:2px; flex-shrink:0;"></i>
+                        <span style="line-height:1.45;"><strong>30 Días de Prueba Incluidos:</strong> Inicias con acceso total al Plan Estándar. Al vencer el mes pasarás al Plan Gratuito en automático si no deseas renovar, adaptándose a sus límites sin cobros sorpresa.</span>
+                    </div>
+
+                    <button type="submit" id="btn-aff-submit" class="btn-submit-affiliate-direct">
+                        <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud de Registro
+                    </button>
+                </form>
+
+                <div id="aff-success-box" style="display:none; text-align:center; padding:2rem 1rem;">
+                    <div style="font-size:3rem; color:#10b981; margin-bottom:0.5rem;"><i class="fa-solid fa-circle-check"></i></div>
+                    <h4 style="font-size:1.3rem; font-weight:800;">¡Solicitud Enviada con Éxito!</h4>
+                    <p style="font-size:0.88rem; color:var(--slate-500); margin:0.5rem 0 1rem;">Revisaremos tus datos y te enviaremos tus accesos por correo en breve.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-dark-footer">
+        <div class="footer-inner-grid">
+            <div>
+                <div class="footer-brand-title" id="footer-brand-title">TuHotel<span>.pe</span></div>
+                <p style="font-size:0.85rem; color:#94a3b8; line-height:1.6; margin-bottom:1.25rem;">
+                    La plataforma y software PMS líder para hoteles en Perú. Conectamos recepciones y huéspedes en tiempo real con 0% comisiones.
+                </p>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Software PMS</div>
+                <ul class="footer-links-list">
+                    <li><a href="#modulos">Rack de Habitaciones</a></li>
+                    <li><a href="#modulos">Portal Huésped QR</a></li>
+                    <li><a href="#modulos">Caja & Turnos</a></li>
+                    <li><a href="#precios">Planes & Membresías</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Para Huéspedes</div>
+                <ul class="footer-links-list">
+                    <li><a href="index.html">Directorio de Hoteles</a></li>
+                    <li><a href="index.html">Mapa Satelital GPS</a></li>
+                    <li><a href="register-guest.html">Soy Huésped</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="footer-col-title">Legal & Soporte</div>
+                <ul class="footer-links-list">
+                    <li><a href="terminos.html">Términos del Servicio</a></li>
+                    <li><a href="privacidad.html">Privacidad de Datos</a></li>
+                    <li><a href="login.html">Acceso al Sistema</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <span>&copy; 2026 TuHotel.pe &bull; Todos los derechos reservados.</span>
+            <span>Software PMS Hotelero Multi-Tenant</span>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof loadSaaSBranding === 'function') {
+                await loadSaaSBranding();
+            }
+            await loadLandingPlans();
+        });
+
+        async function loadLandingPlans() {
+            const grid = document.getElementById('landing-plans-grid');
+            if (!grid) return;
+
+            let plans = [];
+            try {
+                plans = await window.loadSaaSPlansFromDB();
+            } catch (e) {
+                plans = window.getSaaSPlans();
+            }
+
+            if (!plans || plans.length === 0) {
+                plans = window.getSaaSPlans();
+            }
+
+            grid.innerHTML = plans.map(plan => {
+                const isFeatured = plan.is_featured;
+                const color = plan.color || '#2563eb';
+                const priceDisplay = plan.price === 0 ? 'S/ 0' : `S/ ${parseFloat(plan.price).toFixed(0)}`;
+                const periodDisplay = plan.price === 0 
+                    ? '<span style="font-size:0.85rem; color:#64748b; font-weight:600;">/ siempre</span>' 
+                    : `<span style="font-size:0.85rem; color:#64748b; font-weight:600;">/ ${plan.period || 'mes'}</span>`;
+
+                const maxRoomsText = (plan.max_rooms >= 999 || plan.max_rooms === 'unlimited') ? 'Habitaciones ilimitadas' : `Hasta <strong>${plan.max_rooms}</strong> habitaciones`;
+                const maxPhotosText = (plan.max_room_photos >= 99 || plan.max_room_photos === 'unlimited') ? 'Fotos HD sin límite' : `Hasta <strong>${plan.max_room_photos}</strong> fotos por hab.`;
+                const maxCheckinsText = (plan.max_daily_checkins >= 999 || plan.max_daily_checkins === 'unlimited') ? 'Check-ins ilimitados al día' : `Hasta <strong>${plan.max_daily_checkins}</strong> registros / día`;
+
+                const featureItems = (plan.features || []).map(f => `
+                    <li style="display:flex; align-items:flex-start; gap:10px; margin-bottom:0.6rem; font-size:0.88rem; color:#334155;">
+                        <i class="fa-solid fa-check" style="color:${isFeatured ? '#2563eb' : '#10b981'}; margin-top:4px; font-size:0.85rem; flex-shrink:0;"></i>
+                        <span>${escapeHTML(f)}</span>
+                    </li>
+                `).join('');
+
+                const ctaBtnStyle = isFeatured
+                    ? `background:linear-gradient(135deg, ${color}, #1d4ed8); color:white; box-shadow:0 6px 16px rgba(37,99,235,0.25);`
+                    : (plan.price === 0 
+                        ? 'background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;' 
+                        : `background:white; color:${color}; border:2px solid ${color};`);
+
+                return `
+                    <div style="background:white; border:${isFeatured ? `2px solid ${color}` : '1.5px solid #e2e8f0'}; border-radius:20px; padding:2rem 1.75rem; display:flex; flex-direction:column; justify-content:space-between; position:relative; box-shadow:${isFeatured ? '0 12px 32px rgba(37,99,235,0.12)' : '0 4px 16px rgba(0,0,0,0.03)'};">
+                        ${plan.badge ? `
+                            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:${color}; color:white; font-size:0.75rem; font-weight:800; padding:4px 14px; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+                                ${escapeHTML(plan.badge)}
+                            </div>
+                        ` : ''}
+
+                        <div>
+                            <div style="margin-bottom:1rem;">
+                                <h3 style="font-size:1.35rem; font-weight:800; color:#0f172a; margin:0 0 4px;">${escapeHTML(plan.name)}</h3>
+                                <p style="font-size:0.82rem; color:#64748b; margin:0; line-height:1.4;">${escapeHTML(plan.description || '')}</p>
+                            </div>
+
+                            <div style="margin:1.25rem 0; padding-bottom:1.25rem; border-bottom:1px solid #f1f5f9; display:flex; align-items:baseline; gap:4px;">
+                                <span style="font-size:2.4rem; font-weight:900; color:#0f172a; letter-spacing:-1px;">${priceDisplay}</span>
+                                ${periodDisplay}
+                            </div>
+
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:0.75rem 1rem; margin-bottom:1.25rem; font-size:0.82rem; color:#475569; line-height:1.6;">
+                                <div><i class="fa-solid fa-bed" style="color:${color}; width:18px;"></i> ${maxRoomsText}</div>
+                                <div><i class="fa-solid fa-camera" style="color:${color}; width:18px;"></i> ${maxPhotosText}</div>
+                                <div><i class="fa-solid fa-user-check" style="color:${color}; width:18px;"></i> ${maxCheckinsText}</div>
+                            </div>
+
+                            <ul style="list-style:none; padding:0; margin:0 0 1.5rem;">
+                                ${featureItems}
+                            </ul>
+                        </div>
+
+                        <button type="button" onclick="selectPlanInForm('${plan.id}')" class="btn" style="${ctaBtnStyle} width:100%; padding:0.85rem; border-radius:12px; font-weight:800; font-size:0.92rem; text-align:center; border:none; cursor:pointer; transition:all 0.2s ease;">
+                            ${escapeHTML(plan.cta_text || 'Elegir Plan')} &rarr;
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectPlanInForm(planId) {
+            const select = document.getElementById('aff-plan');
+            if (select) {
+                select.value = planId;
+            }
+            const affSection = document.getElementById('afiliacion');
+            if (affSection) {
+                affSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        async function handleDirectAffiliation(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-aff-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando Solicitud...';
+
+            const name = document.getElementById('aff-name').value.trim();
+            const ruc = document.getElementById('aff-ruc').value.trim();
+            const city = document.getElementById('aff-city').value.trim();
+            const room_count = parseInt(document.getElementById('aff-rooms').value) || 1;
+            const address = document.getElementById('aff-address').value.trim();
+            const owner_name = document.getElementById('aff-owner').value.trim();
+            const contact_phone = document.getElementById('aff-phone').value.trim();
+            const contact_email = document.getElementById('aff-email').value.trim();
+            const requested_plan = document.getElementById('aff-plan').value;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hotel_affiliation_requests')
+                    .insert([{
+                        hotel_name: name,
+                        ruc,
+                        city,
+                        room_count,
+                        address,
+                        owner_name,
+                        contact_phone,
+                        contact_email,
+                        requested_plan,
+                        status: 'pending'
+                    }]);
+
+                if (error) throw error;
+
+                document.getElementById('direct-affiliation-form').style.display = 'none';
+                document.getElementById('aff-success-box').style.display = 'block';
+                showToast('¡Solicitud enviada con éxito! Nos comunicaremos en breve.', 'success');
+            } catch (err) {
+                showToast('Error al enviar solicitud: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Solicitud de Registro';
+            }
+        }
+    </script>
+</body>
+</html>
